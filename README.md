@@ -1,1 +1,1 @@
-# CS490VR
+# CS490VR Group Project
