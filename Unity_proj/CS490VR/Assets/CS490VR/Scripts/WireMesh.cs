@@ -19,8 +19,11 @@ public class WireMesh : MonoBehaviour
         voxels[1, 1, 1] = true;
         voxels[1, 1, 0] = true;
         voxels[1, 0, 0] = true;
+        voxels[1, 1, 2] = true;
+        voxels[2, 1, 2] = true;
+        voxels[2, 1, 1] = true;
 
-        //CreateMesh();
+        CreateMesh();
     }
 
     // Start is called before the first frame update
@@ -50,7 +53,7 @@ public class WireMesh : MonoBehaviour
             {
                 for (int z = 0; z < size.z; z++)
                 {
-                    PopulateVertices(ref vertices, ref offsets, x, y, z);
+                    PopulateVertices(ref vertices, ref offsets, ref uv, x, y, z);
                 }
             }
         }
@@ -82,14 +85,48 @@ public class WireMesh : MonoBehaviour
 
                         if (HasConnection(x, y, z, dir[0], dir[1], dir[2]))
                         {
+                            // Skip double-creating the mesh
+                            // Those with lower X/Y/Z coords are prioritized
+                            if (i % 2 == 0) continue;
+
                             // Need to attach the longer wire connection
                             int x2 = x + dir[0];
                             int y2 = y + dir[1];
                             int z2 = z + dir[2];
+                            int[] fv = GetVertices(ref vertices, ref offsets, x, y, z, i);
+                            int[] ov = GetVertices(ref vertices, ref offsets, x2, y2, z2, opposite);
 
-                            int[] face_vertices = GetVertices(ref vertices, ref offsets, x, y, z, i);
-                            int[] oth_vertices = GetVertices(ref vertices, ref offsets, x2, y2, z2, opposite);
-                            Debug.Log(new Vector3(x, y, z));
+                            // Top/down meshes are handled differently
+                            if (i < 2 || i > 3)
+                            {
+                                // Create 8 triangles, connecting the face vertices
+                                int[] connect_triangles = new int[24]
+                                {
+                                    ov[0], ov[1], fv[0],    // Top #1
+                                    ov[0], fv[0], fv[1],    // Top #2
+                                    ov[2], ov[3], fv[2],    // Bottom #1
+                                    fv[2], fv[3], ov[2],    // Bottom #2
+                                    fv[1], ov[3], ov[0],    // Right #1
+                                    fv[1], fv[2], ov[3],    // Right #2
+                                    ov[1], fv[3], fv[0],    // Left #1
+                                    ov[1], ov[2], fv[3],    // Left #2
+                                };
+                                triangles.AddRange(connect_triangles);
+                            } else
+                            {
+                                int[] connect_triangles = new int[24]
+                                {
+                                    ov[0], ov[1], fv[2],    // Front #1
+                                    ov[0], fv[2], fv[3],    // Front #2
+                                    ov[2], ov[3], fv[0],    // Back #1
+                                    ov[2], fv[0], fv[1],    // Back #2
+                                    ov[1], ov[2], fv[2],    // Right #1
+                                    ov[2], fv[1], fv[2],    // Right #2
+                                    ov[3], ov[0], fv[0],    // Left #1
+                                    ov[0], fv[3], fv[0],    // Left #2
+                                };
+                                triangles.AddRange(connect_triangles);
+                            }
                         } else
                         {
                             // Create two triangles on the face vertices
@@ -109,15 +146,20 @@ public class WireMesh : MonoBehaviour
             }
         }
 
-        GetComponent<MeshFilter>().mesh = new Mesh()
+        Mesh newMesh = new Mesh()
         {
             vertices = vertices.ToArray(),
             triangles = triangles.ToArray()
         };
+        newMesh.Optimize();
+        newMesh.RecalculateNormals();
+        //newMesh.RecalculateBounds();
+
+        GetComponent<MeshFilter>().mesh = newMesh;
     }
 
     // Adds the vertices representing coords x,y,z to vertices and updates offsets
-    void PopulateVertices(ref List<Vector3> vertices, ref int[,,] offsets, int x, int y, int z)
+    void PopulateVertices(ref List<Vector3> vertices, ref int[,,] offsets, ref List<Vector2> uv, int x, int y, int z)
     {
         if (voxels[x, y, z])
         {
@@ -136,6 +178,20 @@ public class WireMesh : MonoBehaviour
             };
             offsets[x, y, z] = vertices.Count;
             vertices.AddRange(corners);
+
+            // Populate UVs
+            //List<Vector2> uvs = new List<Vector2>()
+            //{
+            //    new Vector2(5f/8f, 5f/8f),
+            //    new Vector2(3f/8f, 5f/8f),
+            //    new Vector2(5f/8f, 3f/8f),
+            //    new Vector2(3f/8f, 3f/8f),
+            //    new Vector2(5f/8f, 5f/8f),
+            //    new Vector2(3f/8f, 5f/8f),
+            //    new Vector2(5f/8f, 3f/8f),
+            //    new Vector2(3f/8f, 3f/8f)
+            //};
+            //uv.AddRange(uvs);
         }
     }
 
