@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 1245193299396778045}
   - component: {fileID: 1245193299396778042}
   - component: {fileID: 1245193299396778047}
+  - component: {fileID: 4425329646033077824}
   - component: {fileID: 1245193299396778044}
-  - component: {fileID: 8820257701730926149}
+  - component: {fileID: 6487578353940352605}
   m_Layer: 0
   m_Name: Wire
   m_TagString: Untagged
@@ -64,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: de651054f20ea654fb0e468aebdc2b51, type: 2}
+  - {fileID: 2100000, guid: 5cbaa33254b9d2547adf3341a351d4b1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -100,20 +101,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &1245193299396778044
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1245193299396778041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0749319a2909a284a89ba2f18048094f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size: {x: 3, y: 3, z: 3}
---- !u!114 &8820257701730926149
+--- !u!114 &4425329646033077824
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -129,3 +117,28 @@ MonoBehaviour:
   POWERED_TEXTURE: {fileID: 2100000, guid: de651054f20ea654fb0e468aebdc2b51, type: 2}
   UNPOWERED_TEXTURE: {fileID: 2100000, guid: f0315ae3614364b42bdbd06cd4541f5e, type: 2}
   ROTATION: {x: 0, y: 0, z: 0}
+--- !u!114 &1245193299396778044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1245193299396778041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0749319a2909a284a89ba2f18048094f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6487578353940352605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1245193299396778041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97c5d4db0aa5e5d4fbd40be1bc1cf510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: {x: 0, y: 0, z: 0}

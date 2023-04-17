@@ -1221,5 +1221,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wire
       objectReference: {fileID: 0}
+    - target: {fileID: 4425329646033077824, guid: 15c88e4d609d0e044bb7d2e812ad35b4,
+        type: 3}
+      propertyPath: POWERED
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 15c88e4d609d0e044bb7d2e812ad35b4, type: 3}

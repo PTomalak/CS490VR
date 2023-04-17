@@ -2,10 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VoxelData : MonoBehaviour
+public class BlockData : Data
 {
-    // Quick and dirty class to store data for a single voxel
-    // NOTE: only data that affects how a block is rendered matters!
+    // Quick and dirty class to store data shared by any block in the game
 
     // Whether this block is powered
     public bool POWERED = false;
@@ -17,14 +16,9 @@ public class VoxelData : MonoBehaviour
     public Vector3 ROTATION = Vector3.zero;
 
     // Loads (or reloads) this block's data
-    public void Load()
+    public override void Load()
     {
         GetComponent<Renderer>().material = (POWERED) ? POWERED_TEXTURE : UNPOWERED_TEXTURE;
         transform.rotation = Quaternion.Euler(ROTATION);
-    }
-
-    private void Start()
-    {
-        Load();
     }
 }

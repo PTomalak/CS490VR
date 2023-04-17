@@ -4,15 +4,12 @@ using UnityEngine;
 
 public class WireMesh : MonoBehaviour
 {
+    // Load variables
+    WireData data;
+
     // How big the center tile of each wire should be
     // This affects the texture too, which should accomodate for this size
     const float WIRE_SIZE = 3f/8f;
-
-    // The size of the rectangle containing all of the wires
-    public Vector3Int size = new Vector3Int(3,3,3);
-
-    // A 3D array of booleans representing whether there is a wire at each point
-    bool[,,] voxels;
 
     // UV positions stored here for convenience
     Vector2 CONNECTOR_TL = new Vector2(WIRE_SIZE, 1);
@@ -25,31 +22,13 @@ public class WireMesh : MonoBehaviour
     Vector3 CENTER_BL = new Vector2(0, 1 - WIRE_SIZE);
     Vector3 CENTER_BR = new Vector2(WIRE_SIZE, 1 - WIRE_SIZE);
 
-    private void Awake()
+    public void ReloadMesh()
     {
-        voxels = new bool[size.x, size.y, size.z];
-        voxels[1, 1, 1] = true;
-        voxels[1, 1, 0] = true;
-        voxels[1, 0, 0] = true;
-        voxels[1, 1, 2] = true;
-        voxels[2, 1, 2] = true;
-        voxels[2, 1, 1] = true;
+        data = GetComponent<WireData>();
 
         Mesh wireMesh = CreateMesh();
         GetComponent<MeshFilter>().mesh = wireMesh;
         GetComponent<MeshCollider>().sharedMesh = wireMesh;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     Mesh CreateMesh()
@@ -71,14 +50,14 @@ public class WireMesh : MonoBehaviour
                 new int[3]{0,0,-1},                   // left
         };
 
-        for (int x = 0; x < size.x; x++)
+        for (int x = 0; x < data.size.x; x++)
         {
-            for (int y = 0; y < size.y; y++)
+            for (int y = 0; y < data.size.y; y++)
             {
-                for (int z = 0; z < size.z; z++)
+                for (int z = 0; z < data.size.z; z++)
                 {
                     // Skip squares without voxels
-                    if (!voxels[x, y, z]) continue;
+                    if (!data.wires[x, y, z]) continue;
 
                     // Array used for convenience of reversing faces
                     bool[] reverseArray = new bool[6] { true, false, false, true, true, false};
@@ -100,7 +79,7 @@ public class WireMesh : MonoBehaviour
                         {
                             // Skip double-creating the mesh for pairs of connected wires
                             // Those with lower X/Y/Z coords are prioritized
-                            if (voxels[x + dir[0], y + dir[1], z + dir[2]] && i % 2 == 0) continue;
+                            if (data.wires[x + dir[0], y + dir[1], z + dir[2]] && i % 2 == 0) continue;
 
                             // Calculate other position for convenience
                             Vector3 otherPos = new Vector3(x + dir[0], y + dir[1], z + dir[2]);
@@ -314,9 +293,9 @@ public class WireMesh : MonoBehaviour
     // Returns whether there is a wire connection on this axis
     bool HasConnection(int x, int y, int z, int dx, int dy, int dz)
     {
-        if (x + dx < 0 || x + dx > size.x - 1) return false;
-        if (y + dy < 0 || y + dy > size.y - 1) return false;
-        if (z + dz < 0 || z + dz > size.z - 1) return false;
-        return voxels[x + dx, y + dy, z + dz];
+        if (x + dx < 0 || x + dx > data.size.x - 1) return false;
+        if (y + dy < 0 || y + dy > data.size.y - 1) return false;
+        if (z + dz < 0 || z + dz > data.size.z - 1) return false;
+        return data.wires[x + dx, y + dy, z + dz] || data.connections[x + dx, y + dy, z + dz];
     }
 }
