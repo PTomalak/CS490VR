@@ -5,13 +5,25 @@ using UnityEngine;
 public class WireMesh : MonoBehaviour
 {
     // How big the center tile of each wire should be
-    const float WIRE_SIZE = 0.25f;
+    // This affects the texture too, which should accomodate for this size
+    const float WIRE_SIZE = 3f/8f;
 
     // The size of the rectangle containing all of the wires
     public Vector3Int size = new Vector3Int(3,3,3);
 
     // A 3D array of booleans representing whether there is a wire at each point
     bool[,,] voxels;
+
+    // UV positions stored here for convenience
+    Vector2 CONNECTOR_TL = new Vector2(WIRE_SIZE, 1);
+    Vector2 CONNECTOR_TR = new Vector2(1, 1);
+    Vector2 CONNECTOR_BL = new Vector2(WIRE_SIZE, 1 - WIRE_SIZE);
+    Vector2 CONNECTOR_BR = new Vector2(1, 1 - WIRE_SIZE);
+
+    Vector2 CENTER_TL = new Vector2(0, 1);
+    Vector2 CENTER_TR = new Vector2(WIRE_SIZE, 1);
+    Vector3 CENTER_BL = new Vector2(0, 1 - WIRE_SIZE);
+    Vector3 CENTER_BR = new Vector2(WIRE_SIZE, 1 - WIRE_SIZE);
 
     private void Awake()
     {
@@ -23,7 +35,9 @@ public class WireMesh : MonoBehaviour
         voxels[2, 1, 2] = true;
         voxels[2, 1, 1] = true;
 
-        CreateMesh();
+        Mesh wireMesh = CreateMesh();
+        GetComponent<MeshFilter>().mesh = wireMesh;
+        GetComponent<MeshCollider>().sharedMesh = wireMesh;
     }
 
     // Start is called before the first frame update
@@ -38,108 +52,246 @@ public class WireMesh : MonoBehaviour
         
     }
 
-    void CreateMesh()
+    Mesh CreateMesh()
     {
         // Mesh variables
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
         List<Vector2> uv = new List<Vector2>();
-
-        // Populate list of vertices, as well as offsets to quickly find vertices from xyz pos
-        int[,,] offsets = new int[size.x, size.y, size.z];
-        for (int x = 0; x < size.x; x++)
-        {
-            for (int y = 0; y < size.y; y++)
-            {
-                for (int z = 0; z < size.z; z++)
-                {
-                    PopulateVertices(ref vertices, ref offsets, ref uv, x, y, z);
-                }
-            }
-        }
+        List<Vector3> normals = new List<Vector3>();
 
         // Storing each direction vector for convenient checking
         List<int[]> directions = new List<int[]>
         {
                 new int[3]{1,0,0},                    // front
-                new int[3]{-1,0,0},                    // back
+                new int[3]{-1,0,0},                   // back
                 new int[3]{0,1,0},                    // top
                 new int[3]{0,-1,0},                   // bottom
                 new int[3]{0,0,1},                    // right
                 new int[3]{0,0,-1},                   // left
         };
 
-        // Populate triangles
         for (int x = 0; x < size.x; x++)
         {
             for (int y = 0; y < size.y; y++)
             {
                 for (int z = 0; z < size.z; z++)
                 {
+                    // Skip squares without voxels
                     if (!voxels[x, y, z]) continue;
 
+                    // Array used for convenience of reversing faces
+                    bool[] reverseArray = new bool[6] { true, false, false, true, true, false};
+
+                    // Create faces
                     for (int i = 0; i < 6; i++)
                     {
-                        int[] dir = directions[i];                      // Obtain direction vector
-                        int opposite = (i % 2 == 0) ? i + 1 : i - 1;    // Opposite direction on same axis
+                        int[] dir = directions[i];
 
+                        // Pre-calculate relevant variables to be used for both connection faces and cap faces
+                        Vector3 basePos = new Vector3(x, y, z);     // Position of the center of the block
+                        int axis = i / 2;                           // 0 = x, 1 = y, 2 = z
+                        int magnitude = (i % 2 == 0) ? 1 : -1;      // Sign of the direction's axis
+                        float co = WIRE_SIZE / 2;                   // Distance between center and edge of cube
+                        float a_co = co * magnitude;                // Variable center offset that varies based on axis
+
+                        // Either create a single square (no connection) or a long rectangular prism (wire connection)
                         if (HasConnection(x, y, z, dir[0], dir[1], dir[2]))
                         {
-                            // Skip double-creating the mesh
+                            // Skip double-creating the mesh for pairs of connected wires
                             // Those with lower X/Y/Z coords are prioritized
-                            if (i % 2 == 0) continue;
+                            if (voxels[x + dir[0], y + dir[1], z + dir[2]] && i % 2 == 0) continue;
 
-                            // Need to attach the longer wire connection
-                            int x2 = x + dir[0];
-                            int y2 = y + dir[1];
-                            int z2 = z + dir[2];
-                            int[] fv = GetVertices(ref vertices, ref offsets, x, y, z, i);
-                            int[] ov = GetVertices(ref vertices, ref offsets, x2, y2, z2, opposite);
+                            // Calculate other position for convenience
+                            Vector3 otherPos = new Vector3(x + dir[0], y + dir[1], z + dir[2]);
 
-                            // Top/down meshes are handled differently
-                            if (i < 2 || i > 3)
+                            // Calcuate pool of vertices (which will be drawn from multiple times to make connection faces)
+                            List<Vector3> corners = axis switch
                             {
-                                // Create 8 triangles, connecting the face vertices
-                                int[] connect_triangles = new int[24]
+                                0 => new List<Vector3>(){
+                                    // Vertices around the base position
+                                    basePos + new Vector3(a_co, co, co),          //top-right
+                                    basePos + new Vector3(a_co, co, -co),         //top-left
+                                    basePos + new Vector3(a_co, -co, co),         //bottom-right
+                                    basePos + new Vector3(a_co, -co, -co),        //bottom-left
+
+                                    // Vertices around the other position
+                                    otherPos + new Vector3(-a_co, co, co),          //top-right
+                                    otherPos + new Vector3(-a_co, co, -co),         //top-left
+                                    otherPos + new Vector3(-a_co, -co, co),         //bottom-right
+                                    otherPos + new Vector3(-a_co, -co, -co),        //bottom-left
+                                },
+                                1 => new List<Vector3>(){
+                                    // Vertices around the base position
+                                    basePos + new Vector3(co, a_co, co),          //front-right
+                                    basePos + new Vector3(co, a_co, -co),         //front-left
+                                    basePos + new Vector3(-co, a_co, co),         //back-right
+                                    basePos + new Vector3(-co, a_co, -co),        //back-left
+
+                                    // Vertices around the other position
+                                    otherPos + new Vector3(co, -a_co, co),          //front-right
+                                    otherPos + new Vector3(co, -a_co, -co),         //front-left
+                                    otherPos + new Vector3(-co, -a_co, co),         //back-right
+                                    otherPos + new Vector3(-co, -a_co, -co),        //back-left
+                                },
+                                _ => new List<Vector3>(){
+                                    // Vertices around the base position
+                                    basePos + new Vector3(co, co, a_co),          //front-top
+                                    basePos + new Vector3(co, -co, a_co),         //front-bottom
+                                    basePos + new Vector3(-co, co, a_co),         //back-top
+                                    basePos + new Vector3(-co, -co, a_co),        //back-bottom
+
+                                    // Vertices around the other position
+                                    otherPos + new Vector3(co, co, -a_co),          //front-top
+                                    otherPos + new Vector3(co, -co, -a_co),         //front-bottom
+                                    otherPos + new Vector3(-co, co, -a_co),         //back-top
+                                    otherPos + new Vector3(-co, -co, -a_co),        //back-bottom
+                                },
+                            };
+
+                            // Add all vectors twice, since each will be needed twice
+                            int offset = vertices.Count;
+                            vertices.AddRange(corners);
+                            vertices.AddRange(corners);
+
+                            // Add triangles (reverse triangles for y-axis)
+                            int[] new_triangles;
+                            if (axis == 1)
+                            {
+                                new_triangles = new int[24]
                                 {
-                                    ov[0], ov[1], fv[0],    // Top #1
-                                    ov[0], fv[0], fv[1],    // Top #2
-                                    ov[2], ov[3], fv[2],    // Bottom #1
-                                    fv[2], fv[3], ov[2],    // Bottom #2
-                                    fv[1], ov[3], ov[0],    // Right #1
-                                    fv[1], fv[2], ov[3],    // Right #2
-                                    ov[1], fv[3], fv[0],    // Left #1
-                                    ov[1], ov[2], fv[3],    // Left #2
+                                    // "Front/back" faces
+                                    offset+4, offset+0, offset+6,
+                                    offset+6, offset+0, offset+2,
+                                    offset+1, offset+5, offset+7,
+                                    offset+3, offset+1, offset+7,
+
+                                    // "Left/right" faces
+                                    offset+8+5, offset+8+0, offset+8+4,
+                                    offset+8+1, offset+8+0, offset+8+5,
+                                    offset+8+2, offset+8+3, offset+8+6,
+                                    offset+8+6, offset+8+3, offset+8+7,
                                 };
-                                triangles.AddRange(connect_triangles);
                             } else
                             {
-                                int[] connect_triangles = new int[24]
+                                new_triangles = new int[24]
                                 {
-                                    ov[0], ov[1], fv[2],    // Front #1
-                                    ov[0], fv[2], fv[3],    // Front #2
-                                    ov[2], ov[3], fv[0],    // Back #1
-                                    ov[2], fv[0], fv[1],    // Back #2
-                                    ov[1], ov[2], fv[2],    // Right #1
-                                    ov[2], fv[1], fv[2],    // Right #2
-                                    ov[3], ov[0], fv[0],    // Left #1
-                                    ov[0], fv[3], fv[0],    // Left #2
+                                    // "Left/right" faces
+                                    offset+0, offset+4, offset+6,
+                                    offset+0, offset+6, offset+2,
+                                    offset+5, offset+1, offset+7,
+                                    offset+1, offset+3, offset+7,
+
+                                    // "Top/bottom" faces
+                                    offset+8+0, offset+8+5, offset+8+4,
+                                    offset+8+0, offset+8+1, offset+8+5,
+                                    offset+8+3, offset+8+2, offset+8+6,
+                                    offset+8+3, offset+8+6, offset+8+7,
                                 };
-                                triangles.AddRange(connect_triangles);
                             }
-                        } else
-                        {
-                            // Create two triangles on the face vertices
-                            int[] face_vertices = GetVertices(ref vertices, ref offsets, x, y, z, i);
-                            int[] face_triangles = new int[6]{
-                                face_vertices[0],
-                                face_vertices[1],
-                                face_vertices[2],
-                                face_vertices[0],
-                                face_vertices[2],
-                                face_vertices[3]
+                            
+                            triangles.AddRange(new_triangles);
+
+                            // Add UVs
+                            List<Vector2> new_uvs = new List<Vector2>()
+                            {
+                                CONNECTOR_TL, CONNECTOR_TR, CONNECTOR_BL, CONNECTOR_BR,
+                                CONNECTOR_TR, CONNECTOR_TL, CONNECTOR_BR, CONNECTOR_BL,
+                                CONNECTOR_BL, CONNECTOR_TL, CONNECTOR_TL, CONNECTOR_BL,
+                                CONNECTOR_BR, CONNECTOR_TR, CONNECTOR_TR, CONNECTOR_BR,
                             };
-                            triangles.AddRange(face_triangles);
+                            uv.AddRange(new_uvs);
+
+                            // Add new normal vectors
+                            Vector3 norm_a;
+                            Vector3 norm_b;
+                            switch (axis)
+                            {
+                                case 0:
+                                    norm_a = new Vector3(0, 0, 1);
+                                    norm_b = new Vector3(0, 1, 0);
+                                    break;
+                                case 1:
+                                    norm_a = new Vector3(1, 0, 0);
+                                    norm_b = new Vector3(0, 0, 1);
+                                    break;
+                                default:
+                                    norm_a = new Vector3(0, 1, 0);
+                                    norm_b = new Vector3(1, 0, 0);
+                                    break;
+                            }
+                            List<Vector3> new_normals = new List<Vector3>()
+                            {
+                                norm_a, -norm_a, norm_a, -norm_a,
+                                norm_a, -norm_a, norm_a, -norm_a,
+                                norm_b, norm_b, -norm_b, -norm_b,
+                                norm_b, norm_b, -norm_b, -norm_b,
+                            };
+                            normals.AddRange(new_normals);
+                        }
+                        else
+                        {
+                            // Populate vertices
+                            List<Vector3> corners = axis switch
+                            {
+                                0 => new List<Vector3>(){
+                                    basePos + new Vector3(a_co, co, co),          //top-right
+                                    basePos + new Vector3(a_co, co, -co),         //top-left
+                                    basePos + new Vector3(a_co, -co, co),         //bottom-right
+                                    basePos + new Vector3(a_co, -co, -co),        //bottom-left
+                                },
+                                1 => new List<Vector3>(){
+                                    basePos + new Vector3(co, a_co, co),          //front-right
+                                    basePos + new Vector3(co, a_co, -co),         //front-left
+                                    basePos + new Vector3(-co, a_co, co),         //back-right
+                                    basePos + new Vector3(-co, a_co, -co),        //back-left
+                                },
+                                _ => new List<Vector3>(){
+                                    basePos + new Vector3(co, co, a_co),          //front-top
+                                    basePos + new Vector3(co, -co, a_co),         //front-bottom
+                                    basePos + new Vector3(-co, co, a_co),         //back-top
+                                    basePos + new Vector3(-co, -co, a_co),        //back-bottom
+                                },
+                            };
+
+                            // Calculate offset (where triangles are in the vertices list)
+                            // Add new vertices
+                            int offset = vertices.Count;
+                            vertices.AddRange(corners);
+
+                            // Add UVs
+                            // The end / center UV is the top-left corner of the image
+                            List<Vector2> corner_uvs = new List<Vector2>()
+                            {
+                                CENTER_TR, CENTER_TL, CENTER_BR, CENTER_BL
+                            };
+                            uv.AddRange(corner_uvs);
+
+                            // Add new triangles
+                            int[] new_triangles;
+                            if (reverseArray[i])
+                            {
+                                new_triangles = new int[6]
+                                {
+                                    offset+1, offset, offset+2,
+                                    offset+1, offset+2, offset+3
+                                };
+                            } else
+                            {
+                                new_triangles = new int[6]
+                                {
+                                    offset+1, offset+2, offset,
+                                    offset+1, offset+3, offset+2
+                                };
+                            }
+                            triangles.AddRange(new_triangles);
+
+                            // Create normal vectors (pretty straightforward) and add them
+                            Vector3 normal = new Vector3(dir[0], dir[1], dir[2]);
+                            for (int j = 0; j < 4; j++)
+                            {
+                                normals.Add(normal);
+                            }
                         }
                     }
                 }
@@ -149,75 +301,14 @@ public class WireMesh : MonoBehaviour
         Mesh newMesh = new Mesh()
         {
             vertices = vertices.ToArray(),
-            triangles = triangles.ToArray()
+            triangles = triangles.ToArray(),
+            uv = uv.ToArray(),
         };
         newMesh.Optimize();
         newMesh.RecalculateNormals();
-        //newMesh.RecalculateBounds();
+        newMesh.RecalculateBounds();
 
-        GetComponent<MeshFilter>().mesh = newMesh;
-    }
-
-    // Adds the vertices representing coords x,y,z to vertices and updates offsets
-    void PopulateVertices(ref List<Vector3> vertices, ref int[,,] offsets, ref List<Vector2> uv, int x, int y, int z)
-    {
-        if (voxels[x, y, z])
-        {
-            Vector3 basePos = new Vector3(x, y, z);
-            float co = WIRE_SIZE / 2;
-            List<Vector3> corners = new List<Vector3>()
-            {
-                basePos + new Vector3(co, co, co),          //front-top-right
-                basePos + new Vector3(co, co, -co),         //front-top-left
-                basePos + new Vector3(co, -co, co),         //front-bottom-right
-                basePos + new Vector3(co, -co, -co),        //front-bottom-left
-                basePos + new Vector3(-co, co, co),         //back-top-right
-                basePos + new Vector3(-co, co, -co),        //back-top-left
-                basePos + new Vector3(-co, -co, co),        //back-bottom-right
-                basePos + new Vector3(-co, -co, -co),       //back-bottom-left
-            };
-            offsets[x, y, z] = vertices.Count;
-            vertices.AddRange(corners);
-
-            // Populate UVs
-            //List<Vector2> uvs = new List<Vector2>()
-            //{
-            //    new Vector2(5f/8f, 5f/8f),
-            //    new Vector2(3f/8f, 5f/8f),
-            //    new Vector2(5f/8f, 3f/8f),
-            //    new Vector2(3f/8f, 3f/8f),
-            //    new Vector2(5f/8f, 5f/8f),
-            //    new Vector2(3f/8f, 5f/8f),
-            //    new Vector2(5f/8f, 3f/8f),
-            //    new Vector2(3f/8f, 3f/8f)
-            //};
-            //uv.AddRange(uvs);
-        }
-    }
-
-    // Obtain the four vertices of a given block that are perpendicular to that direction, in clockwise order
-    int[] GetVertices(ref List<Vector3> vertices, ref int[,,] offsets, int x, int y, int z, int dir_num)
-    {
-        int offset = offsets[x, y, z];
-
-        // Pre-calculate the relevant index options manually since there's only 6 options
-        // Additionally, elements are sorted to be in clockwise (TL -> TR -> BR -> BL) order when facing them
-        List<int[]> indices_options = new List<int[]>
-        {
-            new int[4] { 1, 0, 2, 3 },  // Front face
-            new int[4] { 4, 5, 7, 6 },  // Back face
-            new int[4] { 5, 4, 0, 1 },  // Top face
-            new int[4] { 3, 2, 6, 7 },  // Bottom face
-            new int[4] { 0, 4, 6, 2 },  // Right face
-            new int[4] { 5, 1, 3, 7 }   // Left face
-        };
-        int[] indices = indices_options[dir_num];
-        for (int i = 0; i < indices.Length; i++)
-        {
-            indices[i] += offset;
-        }
-
-        return indices;
+        return newMesh;
     }
 
     // Returns whether there is a wire connection on this axis
