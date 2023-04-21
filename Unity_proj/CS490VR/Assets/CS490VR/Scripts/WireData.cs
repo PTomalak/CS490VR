@@ -17,6 +17,8 @@ public class WireData : Data
 
     public override void Load()
     {
+        Initialize(3, 3, 3);
+
         // Demo code to show what a wire looks like
         wires[1, 1, 1] = true;
         wires[1, 1, 0] = true;

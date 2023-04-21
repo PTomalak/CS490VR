@@ -113,7 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aef63ddc0343e5f4088ebfd4a6c7043f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  POWERED: 0
+  POWERED: 1
   POWERED_TEXTURE: {fileID: 2100000, guid: de651054f20ea654fb0e468aebdc2b51, type: 2}
   UNPOWERED_TEXTURE: {fileID: 2100000, guid: f0315ae3614364b42bdbd06cd4541f5e, type: 2}
   ROTATION: {x: 0, y: 0, z: 0}
