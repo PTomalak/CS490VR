@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WireData : Data
+public class WireData : MonoBehaviour
 {
     // Class to store wire-specific data
 
@@ -15,7 +15,7 @@ public class WireData : Data
     // A 3D array of booleans representing coordinates connected to this wire network
     public bool[,,] connections;
 
-    public override void Load()
+    public void Load()
     {
         Initialize(3, 3, 3);
 
