@@ -7,4 +7,6 @@ public interface IDataLoader
     public virtual void Load() {}
 
     public virtual void SetData(object o) {}
+
+    public virtual object GetData() { return null; }
 }

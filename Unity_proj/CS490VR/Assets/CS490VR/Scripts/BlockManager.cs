@@ -33,9 +33,7 @@ public class BlockManager : MonoBehaviour
         string id = ((VoxelData)placeData.data).id;
         if (blocks.ContainsKey(id))
         {
-            RemoveData rm = new RemoveData();
-            rm.id = id;
-            RemoveBlock(rm);
+            RemoveBlock(new RemoveData(id));
         }
 
         // Instantiate this voxel if we have a prefab for it

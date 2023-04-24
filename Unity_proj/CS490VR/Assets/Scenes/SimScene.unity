@@ -944,6 +944,30 @@ MonoBehaviour:
   - voxel: pixel
     prefab: {fileID: 1079769595136392027, guid: 2aaa0a869eb1f694e94d0aca7ba93e7b,
       type: 3}
+--- !u!114 &1772401868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1488008506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feef7a14d2d3ab849bd5541f87c1c1af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1772401869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1488008506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e36072bb940f6d448abe565ba69bbf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1934505122
 PrefabInstance:
   m_ObjectHideFlags: 0

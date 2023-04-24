@@ -13,13 +13,18 @@ public class PowerableLoader : MonoBehaviour, IDataLoader
     // Store the powerable data (which references this component for textures)
     public PowerableData data;
 
-    public virtual void Load()
+    public void Load()
     {
         data.UpdateObject(gameObject);
     }
 
-    public virtual void SetData(object o)
+    public void SetData(object o)
     {
         JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(o), data);
+    }
+
+    public object GetData()
+    {
+        return data;
     }
 }
