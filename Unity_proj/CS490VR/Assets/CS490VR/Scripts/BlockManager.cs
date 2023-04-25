@@ -10,6 +10,7 @@ public class BlockManager : MonoBehaviour
     #region components
     JSONParser jp;
     TCPClient tc;
+    WireManager wm;
     #endregion
 
     #region fields
@@ -50,6 +51,9 @@ public class BlockManager : MonoBehaviour
             RemoveBlock(new RemoveData(id));
             message = "Removed Duplicate Block";
         }
+
+        // Place wires differently
+
 
         // Instantiate this voxel if we have a prefab for it
         BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == placeData.block);
@@ -187,6 +191,7 @@ public class BlockManager : MonoBehaviour
     {
         tc = GetComponent<TCPClient>();
         jp = GetComponent<JSONParser>();
+        wm = GetComponentInChildren<WireManager>();
     }
 
     // Start is called before the first frame update
