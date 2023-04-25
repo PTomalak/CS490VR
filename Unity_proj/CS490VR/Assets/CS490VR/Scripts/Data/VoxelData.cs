@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class VoxelData
+public class VoxelData : IData
 {
     // Data values shared by all individual voxels
 
     // ID
-    public string id;
+    public int id;
 
     // Location
     public Vector3Int position;
@@ -17,6 +17,13 @@ public class VoxelData
     {
         gameObject.transform.localPosition = position;
     }
-}
 
+    public override object getDefaultState()
+    {
+        VoxelData vd = new VoxelData();
+        vd.id = 0;
+        vd.position = new Vector3Int(0, 0, 0);
+        return vd;
+    }
+}
 

@@ -8,5 +8,5 @@ public interface IDataLoader
 
     public virtual void SetData(object o) {}
 
-    public virtual object GetData() { return null; }
+    public virtual IData GetData() { return null; }
 }

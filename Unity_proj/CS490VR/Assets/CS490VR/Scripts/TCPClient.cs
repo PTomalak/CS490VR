@@ -21,10 +21,10 @@ public class TCPClient : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        Connect();
     }
 
-    private void Connect(string ip="localhost", int port=8052)
+    public void Connect(string ip="localhost", int port=8052)
     {
         IP = ip;
         PORT = port;
@@ -76,7 +76,7 @@ public class TCPClient : MonoBehaviour
         }
     }
 
-    private void SendMessage(string request)
+    public void SendJson(string request)
     {
         if (socketConnection == null)
         {

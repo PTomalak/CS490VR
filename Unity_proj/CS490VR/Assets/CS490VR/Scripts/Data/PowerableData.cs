@@ -17,4 +17,11 @@ public class PowerableData : VoxelData
         if (!pl) pl = gameObject.GetComponent<PowerableLoader>();
         gameObject.GetComponent<Renderer>().material = (powered) ? pl.ON_MATERIAL : pl.OFF_MATERIAL;
     }
+
+    public override object getDefaultState()
+    {
+        PowerableData vd = (PowerableData)base.getDefaultState();
+        vd.powered = false;
+        return vd;
+    }
 }

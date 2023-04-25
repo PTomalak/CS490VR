@@ -5,15 +5,16 @@ using UnityEngine;
 public class JSONParser : MonoBehaviour
 {
     BlockManager bm;
+    TCPClient tc;
 
     // Classes for interacting with actions in JSON
     [System.Serializable]
-    public struct Action
+    public class Action
     {
         public string action;
-        public object data;
+        public ActionData data;
 
-        public Action(string a, object d)
+        public Action(string a, ActionData d)
         {
             action = a;
             data = d;
@@ -21,42 +22,61 @@ public class JSONParser : MonoBehaviour
     }
 
     [System.Serializable]
-    public struct PlaceData
+    public class ActionData
     {
-        public string voxel;
+    } 
+
+    [System.Serializable]
+    public class PlaceData : ActionData
+    {
+        public string block;
         public object data;
 
         public PlaceData(string v, object d)
         {
-            voxel = v;
+            block = v;
             data = d;
         }
     }
 
     [System.Serializable]
-    public struct RemoveData
+    public class RemoveData : ActionData
     {
-        public string id;
-        public RemoveData(string i)
+        public int id;
+        public RemoveData(int i)
         {
             id = i;
         }
     }
 
     [System.Serializable]
-    public struct UpdateData
+    public class UpdateData : ActionData
     {
-        public string id;
+        public int id;
         public object data;
 
-        public UpdateData(string i, object d)
+        public UpdateData(int i, object d)
         {
             id = i;
             data = d;
+        }
+    }
+
+    [System.Serializable]
+    public class BMResponse
+    {
+        public bool ok;
+        public string message;
+
+        public BMResponse(bool ok, string message)
+        {
+            this.ok = ok;
+            this.message = message;
         }
     }
 
     // Take a request and call attached BlockManager's appropriate action
+    // Also sends a BMResponse reflecting the success of the action
     public void PerformJson(string json)
     {
         Action action = JsonUtility.FromJson<Action>(json);
@@ -65,27 +85,26 @@ public class JSONParser : MonoBehaviour
         if (!bm) bm = GetComponent<BlockManager>();
         if (!bm) return;
 
-        switch (action.action)
+        BMResponse res = action.action switch
         {
-            case "place":
-                bm.PlaceBlock((PlaceData)action.data);
-                break;
-            case "remove":
-                bm.RemoveBlock((RemoveData)action.data);
-                break;
-            case "update":
-                bm.UpdateBlock((UpdateData)action.data);
-                break;
-            default:
-                // Nothing performed for invalid JSON
-                Debug.LogWarning("Invalid JSON Request: " + json);
-                break;
-        }
+            "place" => bm.PlaceBlock((PlaceData)action.data),
+            "remove" => bm.RemoveBlock((RemoveData)action.data),
+            "update" => bm.UpdateBlock((UpdateData)action.data),
+            _ => new BMResponse(false, "Invalid Action"),// Nothing performed for invalid JSON
+        };
+
+        if (!tc) tc = GetComponent<TCPClient>();
+        if (!tc) return;
+
+        tc.SendJson(JsonUtility.ToJson(res));
     }
 
     // Convert local request into JSON and send request
-    public void SendRequest(string request, object data)
+    public void SendRequest(string request, ActionData data)
     {
-        
+        if (!tc) tc = GetComponent<TCPClient>();
+        if (!tc) return;
+
+        tc.SendJson(JsonUtility.ToJson(new Action(request, data)));
     }
 }

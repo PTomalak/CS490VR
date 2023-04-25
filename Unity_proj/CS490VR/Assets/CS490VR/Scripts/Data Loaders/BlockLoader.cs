@@ -16,7 +16,7 @@ public class BlockLoader : MonoBehaviour, IDataLoader
         JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(o), data);
     }
 
-    public object GetData()
+    public IData GetData()
     {
         return data;
     }
