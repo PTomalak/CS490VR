@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class PowerableData : VoxelData
+public class PowerableData : BlockData
 {
     // Whether the block is on or off
     public bool powered;
@@ -18,7 +18,7 @@ public class PowerableData : VoxelData
         gameObject.GetComponent<Renderer>().material = (powered) ? pl.ON_MATERIAL : pl.OFF_MATERIAL;
     }
 
-    public override IData GetDefaultState()
+    public override BlockData GetDefaultState()
     {
         PowerableData vd = (PowerableData)base.GetDefaultState();
         vd.powered = false;

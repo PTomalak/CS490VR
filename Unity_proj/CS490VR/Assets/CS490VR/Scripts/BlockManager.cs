@@ -1,29 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 using static JSONParser;
 
 public class BlockManager : MonoBehaviour
 {
+    #region components
     JSONParser jp;
+    TCPClient tc;
+    #endregion
 
+    #region fields
     // Stores all blocks (not voxels) by ID
     public Dictionary<int, GameObject> blocks = new Dictionary<int, GameObject>();
 
-
+    // Queue to transfer block placing commands from background thread to maing thread
+    public Queue<string> actions = new Queue<string>();
 
     // Interact with in editor to add string / gameObject pairs
     // The string is the block's name, the gameObject is that block's prefab
     [SerializeField]
     public List<BlockPrefabEntry> blockPrefabs;
-
     [System.Serializable]
     public struct BlockPrefabEntry
     {
         public string block;
         public GameObject prefab;
     }
+    #endregion
 
 
 
@@ -35,7 +41,7 @@ public class BlockManager : MonoBehaviour
 
         // Check if our dictionary already contains the block
         // and remove that block
-        int id = ((VoxelData)placeData.data).id;
+        int id = (placeData.data).id;
         if (blocks.ContainsKey(id))
         {
             RemoveBlock(new RemoveData(id));
@@ -51,14 +57,16 @@ public class BlockManager : MonoBehaviour
             if (!newObject) return new BMResponse(false, "Unity Object Creation Failed");
             newObject.name = id.ToString();
 
-            // Update and load the data
+            // Obtain the respective prefab's block loader
             IDataLoader bl = newObject.GetComponent<IDataLoader>();
             if (bl == null)
             {
                 Destroy(newObject);
                 return new BMResponse(false, "Block had no Data Loader");
             }
-            bl.SetData(placeData.data);
+
+            // Update/load unity block data
+            JsonConvert.PopulateObject(JsonConvert.SerializeObject(placeData.data), bl.GetData());
             bl.Load();
 
             // Update our block dictionary
@@ -92,9 +100,10 @@ public class BlockManager : MonoBehaviour
         GameObject target = blocks[updateData.id];
         if (!target) return new BMResponse(false, "Block Not Found");
 
+        // Update block loader
         IDataLoader bl = target.GetComponent<IDataLoader>();
         if (bl == null) return new BMResponse(false, "Block had no Data Loader");
-        bl.SetData(updateData.data);
+        JsonConvert.PopulateObject(JsonConvert.SerializeObject(updateData.data), bl.GetData());
         bl.Load();
 
         return new BMResponse(true, "ok");
@@ -114,25 +123,22 @@ public class BlockManager : MonoBehaviour
         IDataLoader dl = prefab.GetComponent<IDataLoader>();
         if (dl == null) return new BMResponse(false, "Block had no Data Loader");
 
-        IData d = dl.GetData();
+        BlockData d = dl.GetData();
         if (d == null) return new BMResponse(false, "Block had no Data");
 
         // Obtaine block default data to pass to server
-        IData data = d.GetDefaultState();
+        BlockData data = d.GetDefaultState();
 
         // Change position to the requested position and set ID to zero
-        VoxelData vd = new VoxelData();
-        vd.id = 0;
-        vd.position = new Vector3Int(x, y, z);
-        JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(vd), data);
+        data.id = 0;
+        data.position = new int[3] { x, y, z };
 
         // Prepare and send request
-        PlaceData placeData = new PlaceData(block, vd);
-        Debug.Log(JsonUtility.ToJson(placeData));
+        PlaceData placeData = new PlaceData(block, data);
 
-        if (!jp) jp = GetComponent<JSONParser>();
         if (!jp) return new BMResponse(false, "No JSONParser");
-        jp.SendPlaceRequest("place", placeData);
+        
+        jp.SendPlaceRequest(placeData);
 
         return new BMResponse(true, "ok");
     }
@@ -153,19 +159,18 @@ public class BlockManager : MonoBehaviour
         PlaceData d;
         if (voxel == "block")
         {
-            VoxelData v = new VoxelData();
-            v.position = new Vector3Int(x, y, z);
+            BlockData v = new BlockData();
+            v.position = new int[3] { x, y, z };
             v.id = x*100+y*10+z;
             d = new PlaceData(voxel, v);
         } else
         {
             PowerableData p = new PowerableData();
-            p.position = new Vector3Int(x, y, z);
+            p.position = new int[3] { x, y, z };
             p.id = x * 100 + y * 10 + z;
             p.powered = false;
             d = new PlaceData(voxel, p);
         }
-        Debug.Log(JsonUtility.ToJson(d));
         PlaceBlock(d);
     }
 
@@ -178,29 +183,45 @@ public class BlockManager : MonoBehaviour
 
     public void UpdateBlockTest(int x, int y, int z)
     {
-        Vector3Int v = new Vector3Int(x, y, z);
         int id = x * 100 + y * 10 + z;
         PowerableData p = new PowerableData();
-        p.position = v;
+        p.position = new int[3] { x, y, z };
         p.id = id;
         p.powered = true;
-        UpdateData up = new UpdateData(id, p);
+        UpdateData up = new UpdateData(id, "pixel", p);
 
         UpdateBlock(up);
+    }
+
+    private void Awake()
+    {
+        tc = GetComponent<TCPClient>();
+        jp = GetComponent<JSONParser>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        //StartCoroutine(PlaceBlockTest2());
+        StartCoroutine(PlaceBlockTest2());
 
         // For now, call the temporary tests again
-        PlaceBlockTest(1, 2, 3, "pixel");
+        PlaceBlockTest(0, 0, 3, "pixel");
         //PlaceBlockTest(0, 0, 1, "pixel");
         //PlaceBlockTest(0, 0, 2, "pixel");
         //PlaceBlockTest(0, 0, 3, "pixel");
         //RemoveBlockTest(0, 0, 2);
-        //UpdateBlockTest(0, 0, 3);
+        UpdateBlockTest(0, 0, 3);
+    }
+
+    private void FixedUpdate()
+    {
+        // Perform up to a maximum number of queued operations per frame
+        int ops = 0;
+        while(actions.Count > 0 && ops < 50)
+        {
+            jp.PerformJson(actions.Dequeue());
+            ops += 1;
+        }
     }
 
     IEnumerator PlaceBlockTest2()

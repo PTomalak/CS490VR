@@ -6,7 +6,7 @@ public interface IDataLoader
 {
     public virtual void Load() {}
 
-    public virtual void SetData(object o) {}
+    public virtual void SetData(BlockData o) {}
 
-    public virtual IData GetData() { return null; }
+    public virtual BlockData GetData() { return null; }
 }

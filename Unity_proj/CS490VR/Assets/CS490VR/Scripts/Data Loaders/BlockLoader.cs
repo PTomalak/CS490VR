@@ -4,19 +4,14 @@ using UnityEngine;
 
 public class BlockLoader : MonoBehaviour, IDataLoader
 {
-    public VoxelData data;
+    public BlockData data;
 
     public void Load()
     {
         data.UpdateObject(gameObject);
     }
 
-    public void SetData(object o)
-    {
-        JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(o), data);
-    }
-
-    public IData GetData()
+    public BlockData GetData()
     {
         return data;
     }

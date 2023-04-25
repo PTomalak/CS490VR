@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,39 +9,54 @@ public class JSONParser : MonoBehaviour
     TCPClient tc;
 
     // Classes for interacting with actions in JSON
-    [System.Serializable]
     public class Action
     {
         public string action;
-        public ActionData data;
+    }
+    public class PlaceAction : Action
+    {
+        public PlaceData data;
 
-        public Action(string a, ActionData d)
+        public PlaceAction(string action, PlaceData data)
         {
-            action = a;
-            data = d;
+            this.action = action;
+            this.data = data;
+        }
+    }
+    public class UpdateAction : Action
+    {
+        public UpdateData data;
+
+        public UpdateAction(string action, UpdateData data)
+        {
+            this.action = action;
+            this.data = data;
+        }
+    }
+    public class RemoveAction : Action
+    {
+        public RemoveData data;
+
+        public RemoveAction(string action, RemoveData data)
+        {
+            this.action = action;
+            this.data = data;
         }
     }
 
-    [System.Serializable]
-    public class ActionData
-    {
-    } 
-
-    [System.Serializable]
-    public class PlaceData : ActionData
+    // Classes for serializing data for certain types of actions
+    public class PlaceData
     {
         public string block;
-        public object data;
+        public BlockData data;
 
-        public PlaceData(string v, object d)
+        public PlaceData(string v, BlockData d)
         {
             block = v;
             data = d;
         }
     }
-
-    [System.Serializable]
-    public class RemoveData : ActionData
+    public class RemoveData
     {
         public int id;
         public RemoveData(int i)
@@ -48,20 +64,21 @@ public class JSONParser : MonoBehaviour
             id = i;
         }
     }
-
-    [System.Serializable]
-    public class UpdateData : ActionData
+    public class UpdateData
     {
         public int id;
-        public object data;
+        public string block;
+        public BlockData data;
 
-        public UpdateData(int i, object d)
+        public UpdateData(int i, string b, BlockData d)
         {
             id = i;
+            block = b;
             data = d;
         }
     }
 
+    // Class for serializing the BlockManager's response to a given action
     [System.Serializable]
     public class BMResponse
     {
@@ -80,38 +97,42 @@ public class JSONParser : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        bm = GetComponent<BlockManager>();
+        tc = GetComponent<TCPClient>();
+    }
+
     // Take a request and call attached BlockManager's appropriate action
     // Also sends a BMResponse reflecting the success of the action
     public void PerformJson(string json)
     {
-        Action action = JsonUtility.FromJson<Action>(json);
+        Action action = JsonConvert.DeserializeObject<Action>(json);
         if (action.action == null) return;
-
-        if (!bm) bm = GetComponent<BlockManager>();
         if (!bm) return;
 
+
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All
+        };
+        //Debug.Log("PlaceData: " + JsonConvert.SerializeObject(JsonConvert.DeserializeObject<PlaceAction>(json, settings).data));
         BMResponse res = action.action switch
         {
-            "place" => bm.PlaceBlock((PlaceData)action.data),
-            "remove" => bm.RemoveBlock((RemoveData)action.data),
-            "update" => bm.UpdateBlock((UpdateData)action.data),
+            "place" => bm.PlaceBlock(JsonConvert.DeserializeObject<PlaceAction>(json, settings).data),
+            "remove" => bm.RemoveBlock(JsonConvert.DeserializeObject<RemoveAction>(json, settings).data),
+            "update" => bm.UpdateBlock(JsonConvert.DeserializeObject<UpdateAction>(json, settings).data),
             _ => new BMResponse(false, "Invalid Action"),// Nothing performed for invalid JSON
         };
 
-        if (!tc) tc = GetComponent<TCPClient>();
         if (!tc) return;
-
         tc.SendJson(JsonUtility.ToJson(res));
     }
 
     // Convert local request into JSON and send request
-    public void SendPlaceRequest(string request, PlaceData data)
+    public void SendPlaceRequest(PlaceData data)
     {
-        if (!tc) tc = GetComponent<TCPClient>();
         if (!tc) return;
-
-        string json = JsonUtility.ToJson(new Action(request, data));
-
-        tc.SendJson(json);
+        tc.SendJson(JsonConvert.SerializeObject(new PlaceAction("place", data)));
     }
 }

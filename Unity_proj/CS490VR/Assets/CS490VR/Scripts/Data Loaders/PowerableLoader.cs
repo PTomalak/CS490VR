@@ -18,12 +18,7 @@ public class PowerableLoader : MonoBehaviour, IDataLoader
         data.UpdateObject(gameObject);
     }
 
-    public void SetData(object o)
-    {
-        JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(o), data);
-    }
-
-    public IData GetData()
+    public BlockData GetData()
     {
         return data;
     }
