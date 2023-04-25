@@ -39,9 +39,12 @@ public class BlockManager : MonoBehaviour
     {
         string message = "ok";
 
+        string blockJson = JsonConvert.SerializeObject(placeData.data);
+        BlockData basicData = JsonConvert.DeserializeObject<BlockData>(blockJson);
+
         // Check if our dictionary already contains the block
         // and remove that block
-        int id = (placeData.data).id;
+        int id = basicData.id;
         if (blocks.ContainsKey(id))
         {
             RemoveBlock(new RemoveData(id));
@@ -66,7 +69,7 @@ public class BlockManager : MonoBehaviour
             }
 
             // Update/load unity block data
-            JsonConvert.PopulateObject(JsonConvert.SerializeObject(placeData.data), bl.GetData());
+            JsonConvert.PopulateObject(blockJson, bl.GetData());
             bl.Load();
 
             // Update our block dictionary
@@ -116,6 +119,7 @@ public class BlockManager : MonoBehaviour
     // Used by client to place a block at a given local XYZ position
     public BMResponse ClientPlaceBlock(string block, int x, int y, int z)
     {
+        // Find the prefab, data loader, and data
         BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == block);
         if (!blockPrefabs.Contains(e)) return new BMResponse(false, "No Prefab for: " + block);
 
@@ -126,18 +130,18 @@ public class BlockManager : MonoBehaviour
         BlockData d = dl.GetData();
         if (d == null) return new BMResponse(false, "Block had no Data");
 
-        // Obtaine block default data to pass to server
+
+        // Obtaine block's default data to pass to server
         BlockData data = d.GetDefaultState();
 
         // Change position to the requested position and set ID to zero
+        //data.id = x * 100 + y * 10 + z;
         data.id = 0;
         data.position = new int[3] { x, y, z };
 
         // Prepare and send request
         PlaceData placeData = new PlaceData(block, data);
-
         if (!jp) return new BMResponse(false, "No JSONParser");
-        
         jp.SendPlaceRequest(placeData);
 
         return new BMResponse(true, "ok");
@@ -152,45 +156,31 @@ public class BlockManager : MonoBehaviour
         ClientPlaceBlock(block, p.x, p.y, p.z);
     }
 
-
-    ///// TEMPORARY TESTS /////
-    public void PlaceBlockTest(int x, int y, int z, string voxel="block")
+    public BMResponse ClientRemoveBlock(int id)
     {
-        PlaceData d;
-        if (voxel == "block")
-        {
-            BlockData v = new BlockData();
-            v.position = new int[3] { x, y, z };
-            v.id = x*100+y*10+z;
-            d = new PlaceData(voxel, v);
-        } else
-        {
-            PowerableData p = new PowerableData();
-            p.position = new int[3] { x, y, z };
-            p.id = x * 100 + y * 10 + z;
-            p.powered = false;
-            d = new PlaceData(voxel, p);
-        }
-        PlaceBlock(d);
+        // Unnecessary check here (server can just do it), but this helps reduce client-server communication
+        GameObject target = blocks[id];
+        if (!target) return new BMResponse(false, "Block Not Found");
+
+        // Prepare and send request
+        RemoveData requestData = new RemoveData(id);
+        if (!jp) return new BMResponse(false, "No JSONParser");
+        jp.SendRemoveRequest(requestData);
+
+        return new BMResponse(true, "ok");
     }
 
-    public void RemoveBlockTest(int x, int y, int z)
+    public BMResponse ClientUpdateBlock(int id, string block, object data)
     {
-        int id = x * 100 + y * 10 + z;
-        RemoveData rm = new RemoveData(id);
-        RemoveBlock(rm);
-    }
+        // Unnecessary check here (server can just do it), but this helps reduce client-server communication
+        GameObject target = blocks[id];
+        if (!target) return new BMResponse(false, "Block Not Found");
 
-    public void UpdateBlockTest(int x, int y, int z)
-    {
-        int id = x * 100 + y * 10 + z;
-        PowerableData p = new PowerableData();
-        p.position = new int[3] { x, y, z };
-        p.id = id;
-        p.powered = true;
-        UpdateData up = new UpdateData(id, "pixel", p);
+        UpdateData requestData = new UpdateData(id, block, data);
+        if (!jp) return new BMResponse(false, "No JSONParser");
+        jp.SendUpdateRequest(requestData);
 
-        UpdateBlock(up);
+        return new BMResponse(true, "ok");
     }
 
     private void Awake()
@@ -202,15 +192,7 @@ public class BlockManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(PlaceBlockTest2());
-
-        // For now, call the temporary tests again
-        PlaceBlockTest(0, 0, 3, "pixel");
-        //PlaceBlockTest(0, 0, 1, "pixel");
-        //PlaceBlockTest(0, 0, 2, "pixel");
-        //PlaceBlockTest(0, 0, 3, "pixel");
-        //RemoveBlockTest(0, 0, 2);
-        UpdateBlockTest(0, 0, 3);
+        //StartCoroutine(BlockTest());
     }
 
     private void FixedUpdate()
@@ -224,10 +206,44 @@ public class BlockManager : MonoBehaviour
         }
     }
 
-    IEnumerator PlaceBlockTest2()
+    // Block test waits a few seconds for the server to activate, then places/edits several blocks
+    IEnumerator BlockTest()
     {
         yield return new WaitForSeconds(5);
 
-        ClientPlaceBlock("block", 1, 2, 3);
+        ClientPlaceBlock("block", 0, 2, 2);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("block", 2, 2, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("block", 2, 0, 2);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("block", 2, 2, 2);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("pixel", 0, 0, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("pixel", 2, 0, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("pixel", 0, 2, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("pixel", 0, 0, 2);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("pixel", 0, 3, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientRemoveBlock(030);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("pixel", 0, 4, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientUpdateBlock(040, "pixel", new { powered = true });
     }
 }

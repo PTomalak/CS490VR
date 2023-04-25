@@ -78,9 +78,16 @@ public class TCPClient : MonoBehaviour
                         // Convert byte array to string message. 						
                         string serverMessage = Encoding.ASCII.GetString(incommingData);
 
-                        // Enqueue the next action
-                        bm.actions.Enqueue(serverMessage);
-                        //jp.PerformJson(serverMessage);
+                        string modifiedMessage = serverMessage.Replace("}{", "}||{");
+
+                        // Split up the server message in case its multiple JSONs
+                        foreach (string message in serverMessage.Replace("}{", "}||{").Split("||"))
+                        {
+                            Debug.Log(message);
+
+                            // Enqueue the next action
+                            bm.actions.Enqueue(serverMessage);
+                        }
                     }
                 }
             }

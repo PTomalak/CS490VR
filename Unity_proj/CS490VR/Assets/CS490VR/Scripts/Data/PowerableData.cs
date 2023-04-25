@@ -6,9 +6,9 @@ using UnityEngine;
 public class PowerableData : BlockData
 {
     // Whether the block is on or off
-    public bool powered;
+    public bool powered = false;
 
-    // Caching GetComponent call
+    // Caching GetComponent call (not serialized)
     private PowerableLoader pl;
 
     public override void UpdateObject(GameObject gameObject)
@@ -20,8 +20,6 @@ public class PowerableData : BlockData
 
     public override BlockData GetDefaultState()
     {
-        PowerableData vd = (PowerableData)base.GetDefaultState();
-        vd.powered = false;
-        return vd;
+        return new PowerableData();
     }
 }

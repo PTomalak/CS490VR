@@ -48,7 +48,7 @@ public class JSONParser : MonoBehaviour
     public class PlaceData
     {
         public string block;
-        public BlockData data;
+        public object data;
 
         public PlaceData(string v, BlockData d)
         {
@@ -68,9 +68,9 @@ public class JSONParser : MonoBehaviour
     {
         public int id;
         public string block;
-        public BlockData data;
+        public object data;
 
-        public UpdateData(int i, string b, BlockData d)
+        public UpdateData(int i, string b, object d)
         {
             id = i;
             block = b;
@@ -97,6 +97,7 @@ public class JSONParser : MonoBehaviour
         }
     }
 
+    ///// UNITY FUNCTIONS /////
     private void Awake()
     {
         bm = GetComponent<BlockManager>();
@@ -108,20 +109,19 @@ public class JSONParser : MonoBehaviour
     public void PerformJson(string json)
     {
         Action action = JsonConvert.DeserializeObject<Action>(json);
-        if (action.action == null) return;
+        if (action.action == null) return;  // Do nothing for a non-action
         if (!bm) return;
 
 
-        JsonSerializerSettings settings = new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.All
-        };
-        //Debug.Log("PlaceData: " + JsonConvert.SerializeObject(JsonConvert.DeserializeObject<PlaceAction>(json, settings).data));
+        // Unpack the BlockData for a place/update action
+        
+
+        Debug.Log("PlaceData: " + JsonConvert.SerializeObject(JsonConvert.DeserializeObject<PlaceAction>(json).data));
         BMResponse res = action.action switch
         {
-            "place" => bm.PlaceBlock(JsonConvert.DeserializeObject<PlaceAction>(json, settings).data),
-            "remove" => bm.RemoveBlock(JsonConvert.DeserializeObject<RemoveAction>(json, settings).data),
-            "update" => bm.UpdateBlock(JsonConvert.DeserializeObject<UpdateAction>(json, settings).data),
+            "place" => bm.PlaceBlock(JsonConvert.DeserializeObject<PlaceAction>(json).data),
+            "remove" => bm.RemoveBlock(JsonConvert.DeserializeObject<RemoveAction>(json).data),
+            "update" => bm.UpdateBlock(JsonConvert.DeserializeObject<UpdateAction>(json).data),
             _ => new BMResponse(false, "Invalid Action"),// Nothing performed for invalid JSON
         };
 
@@ -134,5 +134,15 @@ public class JSONParser : MonoBehaviour
     {
         if (!tc) return;
         tc.SendJson(JsonConvert.SerializeObject(new PlaceAction("place", data)));
+    }
+    public void SendRemoveRequest(RemoveData data)
+    {
+        if (!tc) return;
+        tc.SendJson(JsonConvert.SerializeObject(new RemoveAction("remove", data)));
+    }
+    public void SendUpdateRequest(UpdateData data)
+    {
+        if (!tc) return;
+        tc.SendJson(JsonConvert.SerializeObject(new UpdateAction("update", data)));
     }
 }

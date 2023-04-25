@@ -9,7 +9,7 @@ public class BlockData
     // Data values shared by all blocks
 
     // ID
-    public int id;
+    public int id = 0;
 
     // Location (multivoxels can interpret this value as they choose, usually the center)
     public int[] position = new int[3];
@@ -24,8 +24,6 @@ public class BlockData
     public virtual BlockData GetDefaultState()
     {
         BlockData vd = new BlockData();
-        vd.id = 0;
-        vd.position = new int[3] {0,0,0};
         return vd;
     }
 }
