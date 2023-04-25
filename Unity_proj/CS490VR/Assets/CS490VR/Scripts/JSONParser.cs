@@ -114,9 +114,6 @@ public class JSONParser : MonoBehaviour
 
 
         // Unpack the BlockData for a place/update action
-        
-
-        Debug.Log("PlaceData: " + JsonConvert.SerializeObject(JsonConvert.DeserializeObject<PlaceAction>(json).data));
         BMResponse res = action.action switch
         {
             "place" => bm.PlaceBlock(JsonConvert.DeserializeObject<PlaceAction>(json).data),

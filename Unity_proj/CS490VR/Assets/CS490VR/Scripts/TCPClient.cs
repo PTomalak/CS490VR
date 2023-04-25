@@ -83,8 +83,6 @@ public class TCPClient : MonoBehaviour
                         // Split up the server message in case its multiple JSONs
                         foreach (string message in serverMessage.Replace("}{", "}||{").Split("||"))
                         {
-                            Debug.Log(message);
-
                             // Enqueue the next action
                             bm.actions.Enqueue(serverMessage);
                         }
