@@ -854,6 +854,9 @@ MonoBehaviour:
   - block: pixel
     prefab: {fileID: 1079769595136392027, guid: 2aaa0a869eb1f694e94d0aca7ba93e7b,
       type: 3}
+  - block: toggle
+    prefab: {fileID: 8348371863008964499, guid: fd32d2ecf44b8cf4d80f57e0c2639e74,
+      type: 3}
 --- !u!114 &1772401868
 MonoBehaviour:
   m_ObjectHideFlags: 0
