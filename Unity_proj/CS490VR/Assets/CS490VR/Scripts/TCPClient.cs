@@ -8,26 +8,27 @@ using UnityEngine;
 
 public class TCPClient : MonoBehaviour
 {
-    #region private members 	
     private TcpClient socketConnection;
     private Thread clientReceiveThread;
-    #endregion
 
-    int PORT = 8052;
+    int PORT = 33333;
     string IP = "localhost";
+    JSONParser jp;
 
     ///// ADAPTED FROM BOILERPLATE TCP CLIENT CODE /////
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        Connect();
+        Connect(IP, PORT);
     }
 
-    public void Connect(string ip="localhost", int port=8052)
+    public void Connect(string ip, int port)
     {
         IP = ip;
         PORT = port;
+        jp = GetComponent<JSONParser>();
+        if (!jp) return;
 
         try
         {
@@ -43,9 +44,6 @@ public class TCPClient : MonoBehaviour
 
     private void ListenForData()
     {
-        JSONParser jp = GetComponent<JSONParser>();
-        if (!jp) return;
-
         try
         {
             socketConnection = new TcpClient(IP, PORT);
@@ -72,7 +70,7 @@ public class TCPClient : MonoBehaviour
         }
         catch (SocketException socketException)
         {
-            Debug.Log("Socket exception: " + socketException);
+            Debug.Log("Socket Listen exception: " + socketException);
         }
     }
 
@@ -97,7 +95,7 @@ public class TCPClient : MonoBehaviour
         }
         catch (SocketException socketException)
         {
-            Debug.Log("Socket exception: " + socketException);
+            Debug.Log("Socket Write exception: " + socketException);
         }
     }
 }

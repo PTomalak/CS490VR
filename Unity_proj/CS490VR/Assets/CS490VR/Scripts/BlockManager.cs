@@ -105,32 +105,36 @@ public class BlockManager : MonoBehaviour
     ///// CLIENT SENDING METHODS /////
     
     // Used by client to place a block at a given local XYZ position
-    public void ClientPlaceBlock(string block, int x, int y, int z)
+    public BMResponse ClientPlaceBlock(string block, int x, int y, int z)
     {
         BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == block);
-        if (!blockPrefabs.Contains(e)) return;
+        if (!blockPrefabs.Contains(e)) return new BMResponse(false, "No Prefab for: " + block);
 
         GameObject prefab = e.prefab;
         IDataLoader dl = prefab.GetComponent<IDataLoader>();
-        if (dl == null) return;
+        if (dl == null) return new BMResponse(false, "Block had no Data Loader");
 
         IData d = dl.GetData();
-        if (d == null) return;
+        if (d == null) return new BMResponse(false, "Block had no Data");
 
         // Obtaine block default data to pass to server
-        object data = d.getDefaultState();
+        IData data = d.GetDefaultState();
 
-        // Change position to the requested positin and set ID to zero
+        // Change position to the requested position and set ID to zero
         VoxelData vd = new VoxelData();
         vd.id = 0;
         vd.position = new Vector3Int(x, y, z);
         JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(vd), data);
 
         // Prepare and send request
-        PlaceData placeData = new PlaceData(block, data);
+        PlaceData placeData = new PlaceData(block, vd);
+        Debug.Log(JsonUtility.ToJson(placeData));
+
         if (!jp) jp = GetComponent<JSONParser>();
-        if (!jp) return;
-        jp.SendRequest("place", placeData);
+        if (!jp) return new BMResponse(false, "No JSONParser");
+        jp.SendPlaceRequest("place", placeData);
+
+        return new BMResponse(true, "ok");
     }
 
     // Global coordinate version of ClientPlaceBlock
@@ -161,7 +165,7 @@ public class BlockManager : MonoBehaviour
             p.powered = false;
             d = new PlaceData(voxel, p);
         }
-        Debug.Log(JsonUtility.ToJson(d.data));
+        Debug.Log(JsonUtility.ToJson(d));
         PlaceBlock(d);
     }
 
@@ -188,12 +192,21 @@ public class BlockManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //StartCoroutine(PlaceBlockTest2());
+
         // For now, call the temporary tests again
-        PlaceBlockTest(0, 0, 0);
-        PlaceBlockTest(0, 0, 1, "pixel");
-        PlaceBlockTest(0, 0, 2, "pixel");
-        PlaceBlockTest(0, 0, 3, "pixel");
-        RemoveBlockTest(0, 0, 2);
-        UpdateBlockTest(0, 0, 3);
+        PlaceBlockTest(1, 2, 3, "pixel");
+        //PlaceBlockTest(0, 0, 1, "pixel");
+        //PlaceBlockTest(0, 0, 2, "pixel");
+        //PlaceBlockTest(0, 0, 3, "pixel");
+        //RemoveBlockTest(0, 0, 2);
+        //UpdateBlockTest(0, 0, 3);
+    }
+
+    IEnumerator PlaceBlockTest2()
+    {
+        yield return new WaitForSeconds(5);
+
+        ClientPlaceBlock("block", 1, 2, 3);
     }
 }

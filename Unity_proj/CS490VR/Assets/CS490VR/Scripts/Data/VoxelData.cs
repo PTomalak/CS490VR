@@ -18,7 +18,7 @@ public class VoxelData : IData
         gameObject.transform.localPosition = position;
     }
 
-    public override object getDefaultState()
+    public override IData GetDefaultState()
     {
         VoxelData vd = new VoxelData();
         vd.id = 0;

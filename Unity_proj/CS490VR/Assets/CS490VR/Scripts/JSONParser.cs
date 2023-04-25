@@ -73,6 +73,11 @@ public class JSONParser : MonoBehaviour
             this.ok = ok;
             this.message = message;
         }
+
+        public override string ToString()
+        {
+            return ok.ToString()+": "+message;
+        }
     }
 
     // Take a request and call attached BlockManager's appropriate action
@@ -100,11 +105,13 @@ public class JSONParser : MonoBehaviour
     }
 
     // Convert local request into JSON and send request
-    public void SendRequest(string request, ActionData data)
+    public void SendPlaceRequest(string request, PlaceData data)
     {
         if (!tc) tc = GetComponent<TCPClient>();
         if (!tc) return;
 
-        tc.SendJson(JsonUtility.ToJson(new Action(request, data)));
+        string json = JsonUtility.ToJson(new Action(request, data));
+
+        tc.SendJson(json);
     }
 }

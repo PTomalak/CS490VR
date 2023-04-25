@@ -18,9 +18,9 @@ public class PowerableData : VoxelData
         gameObject.GetComponent<Renderer>().material = (powered) ? pl.ON_MATERIAL : pl.OFF_MATERIAL;
     }
 
-    public override object getDefaultState()
+    public override IData GetDefaultState()
     {
-        PowerableData vd = (PowerableData)base.getDefaultState();
+        PowerableData vd = (PowerableData)base.GetDefaultState();
         vd.powered = false;
         return vd;
     }
