@@ -1,11 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static JSONParser;
 
 public class WireManager : MonoBehaviour
 {
+    #region components
+    WireMesh mesh;
+    #endregion
+
+    // Used to update mesh
+    public bool hasChanged;
+
     // List of wire IDs
-    public List<int> wire_ids = new List<int>();
+    //public List<int> wire_ids = new List<int>();
+    public Dictionary<int, int[]> wire_ids = new Dictionary<int, int[]>();
 
     // 3D Wire map (maps [x,y,z] to {id, powered})
     [HideInInspector]
@@ -38,17 +47,72 @@ public class WireManager : MonoBehaviour
     [HideInInspector]
     public List<int[]> connections = new List<int[]>();
 
-    // Adds a wire
+    // Adds a wire to the grid
     public bool AddWire(int x, int y, int z, int id, bool powered)
     {
-        if (wire_ids.Contains(id)) return false;
+        if (wire_ids.ContainsKey(id)) return false;
 
         int[] coords = new int[3] { x, y, z };
         if (wire_map.ContainsKey(coords)) return false;
 
-        wire_ids.Add(id);
+        wire_ids.Add(id, coords);
         wire_map.Add(coords, new WireMapObject(id, powered));
+        hasChanged = true;
         return true;
+    }
+
+    public bool PlaceWire(PowerableData data)
+    {
+        int[] p = data.position;
+        return AddWire(p[0], p[1], p[2], data.id, data.powered);
+    }
+
+    public bool UpdateWire(int id, PowerableData data)
+    {
+        if (!wire_ids.ContainsKey(id)) return false;
+
+        // Determine if we need to move the wire (new position != old position)
+        int[] coords = wire_ids[id];
+        bool eq = true;
+        for (int i = 0; i < coords.Length; i++)
+        {
+            if (coords[i] != data.position[i])
+            {
+                eq = false;
+                break;
+            }
+        }
+
+        if (!wire_map.ContainsKey(coords)) return false;
+
+        if (eq)
+        {
+            wire_map[coords].powered = data.powered;
+        } else
+        {
+            wire_ids[id] = data.position;
+            wire_map.Remove(coords);
+            wire_map.Add(data.position, new WireMapObject(id, data.powered));
+        }
+
+        hasChanged = true;
+        return true;
+    }
+
+    public bool RemoveWire(int id)
+    {
+        if (!wire_ids.ContainsKey(id)) return false;
+        int[] coords = wire_ids[id];
+        wire_ids.Remove(id);
+        wire_map.Remove(coords);
+
+        hasChanged = true;
+        return true;
+    }
+
+    private void Awake()
+    {
+        mesh = GetComponent<WireMesh>();
     }
 
     private void Start()
@@ -63,6 +127,6 @@ public class WireManager : MonoBehaviour
         //AddWire(3, 2, 3, 7, true);
         //AddWire(3, 3, 3, 8, true);
         //connections.Add(new int[3] { 3, 4, 3 });
-        //GetComponent<WireMesh>().ReloadMesh();
+        //
     }
 }

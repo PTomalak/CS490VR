@@ -43,17 +43,22 @@ public class BlockManager : MonoBehaviour
         string blockJson = JsonConvert.SerializeObject(placeData.data);
         BlockData basicData = JsonConvert.DeserializeObject<BlockData>(blockJson);
 
-        // Check if our dictionary already contains the block
-        // and remove that block
+        // Check if our dictionary already contains the block (or wire)
+        // and remove that block (or wire)
         int id = basicData.id;
-        if (blocks.ContainsKey(id))
+        if (blocks.ContainsKey(id) || wm.wire_ids.ContainsKey(id))
         {
             RemoveBlock(new RemoveData(id));
             message = "Removed Duplicate Block";
         }
 
-        // Place wires differently
-
+        // Place wires using the WireManager
+        if (placeData.block == "wire")
+        {
+            PowerableData wire_data = JsonConvert.DeserializeObject<PowerableData>(blockJson);
+            bool res = wm.PlaceWire(wire_data);
+            return new BMResponse(res, (res) ? "ok (wire)" : "Wire Manager couldn't place wire");
+        }
 
         // Instantiate this voxel if we have a prefab for it
         BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == placeData.block);
@@ -89,6 +94,13 @@ public class BlockManager : MonoBehaviour
     // Removes a block from the world
     public BMResponse RemoveBlock(RemoveData removeData)
     {
+        // See if we are removing a wire and intercept the removal
+        if (wm.wire_ids.ContainsKey(removeData.id))
+        {
+            bool res = wm.RemoveWire(removeData.id);
+            return new BMResponse(res, (res) ? "ok (wire)" : "Wire Manager couldn't remove wire");
+        }
+
         // Check if we have that block in our system
         GameObject target = blocks[removeData.id];
         if (!target) return new BMResponse(false, "Block Not Found");
@@ -103,6 +115,16 @@ public class BlockManager : MonoBehaviour
     // Updates the data of a block
     public BMResponse UpdateBlock(UpdateData updateData)
     {
+        string blockJson = JsonConvert.SerializeObject(updateData.data);
+
+        // See if we are updating a wire and intercept the update
+        if (wm.wire_ids.ContainsKey(updateData.id))
+        {
+            PowerableData wire_data = JsonConvert.DeserializeObject<PowerableData>(blockJson);
+            bool res = wm.UpdateWire(updateData.id, wire_data);
+            return new BMResponse(res, (res) ? "ok (wire)" : "Wire Manager couldn't update wire");
+        }
+
         // Check if we have that block in our system
         GameObject target = blocks[updateData.id];
         if (!target) return new BMResponse(false, "Block Not Found");
@@ -110,7 +132,7 @@ public class BlockManager : MonoBehaviour
         // Update block loader
         IDataLoader bl = target.GetComponent<IDataLoader>();
         if (bl == null) return new BMResponse(false, "Block had no Data Loader");
-        JsonConvert.PopulateObject(JsonConvert.SerializeObject(updateData.data), bl.GetData());
+        JsonConvert.PopulateObject(blockJson, bl.GetData());
         bl.Load();
 
         return new BMResponse(true, "ok");
@@ -123,6 +145,24 @@ public class BlockManager : MonoBehaviour
     // Used by client to place a block at a given local XYZ position
     public BMResponse ClientPlaceBlock(string block, int x, int y, int z)
     {
+        // Manually handle wire placement
+        if (block == "wire")
+        {
+            // Construct wire data
+            PowerableData wire_data = new PowerableData();
+            wire_data.position = new int[] { x, y, z };
+            wire_data.id = 0;
+            //wire_data.id = x * 100 + y * 10 + z;
+            wire_data.powered = false;
+
+            // Prepare and send request
+            PlaceData wirePlaceData = new PlaceData(block, wire_data);
+            if (!jp) return new BMResponse(false, "No JSONParser");
+            jp.SendPlaceRequest(wirePlaceData);
+
+            return new BMResponse(true, "ok");
+        }
+
         // Find the prefab, data loader, and data
         BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == block);
         if (!blockPrefabs.Contains(e)) return new BMResponse(false, "No Prefab for: " + block);
@@ -139,8 +179,8 @@ public class BlockManager : MonoBehaviour
         BlockData data = d.GetDefaultState();
 
         // Change position to the requested position and set ID to zero
-        //data.id = x * 100 + y * 10 + z;
         data.id = 0;
+        //data.id = x * 100 + y * 10 + z;
         data.position = new int[3] { x, y, z };
 
         // Prepare and send request
