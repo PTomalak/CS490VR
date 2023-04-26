@@ -18,7 +18,7 @@ public class WireManager : MonoBehaviour
 
     // 3D Wire map (maps [x,y,z] to {id, powered})
     [HideInInspector]
-    public Dictionary<int[], WireMapObject> wire_map = new Dictionary<int[], WireMapObject>(new WireCompare());
+    public Dictionary<int[], WireData> wire_map = new Dictionary<int[], WireData>(new WireCompare());
     public class WireCompare : IEqualityComparer<int[]>
     {
         bool IEqualityComparer<int[]>.Equals(int[] x, int[] y)
@@ -31,12 +31,12 @@ public class WireManager : MonoBehaviour
             return new Vector3Int(obj[0], obj[1], obj[2]).GetHashCode();
         }
     }
-    public class WireMapObject
+    public class WireData
     {
         public int id;
         public bool powered;
 
-        public WireMapObject(int id, bool powered)
+        public WireData(int id, bool powered)
         {
             this.id = id;
             this.powered = powered;
@@ -56,7 +56,7 @@ public class WireManager : MonoBehaviour
         if (wire_map.ContainsKey(coords)) return false;
 
         wire_ids.Add(id, coords);
-        wire_map.Add(coords, new WireMapObject(id, powered));
+        wire_map.Add(coords, new WireData(id, powered));
         hasChanged = true;
         return true;
     }
@@ -92,7 +92,7 @@ public class WireManager : MonoBehaviour
         {
             wire_ids[id] = data.position;
             wire_map.Remove(coords);
-            wire_map.Add(data.position, new WireMapObject(id, data.powered));
+            wire_map.Add(data.position, new WireData(id, data.powered));
         }
 
         hasChanged = true;

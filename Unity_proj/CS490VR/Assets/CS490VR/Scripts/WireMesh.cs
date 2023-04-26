@@ -138,7 +138,7 @@ public class WireMesh : MonoBehaviour
 
                     // Add triangles (reverse triangles for y-axis)
                     int[] new_triangles;
-                    if (axis == 1 && i == 3)
+                    if (reverseArray[i])
                     {
                         new_triangles = new int[24]
                         {

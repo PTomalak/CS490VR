@@ -8,7 +8,7 @@ public class PowerableData : BlockData
     // Whether the block is on or off
     public bool powered = false;
 
-    // Caching GetComponent call (not serialized)
+    // Caching GetComponent calls (not serialized)
     private PowerableLoader pl;
 
     public override void UpdateObject(GameObject gameObject)

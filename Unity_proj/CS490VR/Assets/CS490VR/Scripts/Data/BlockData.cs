@@ -23,8 +23,7 @@ public class BlockData
 
     public virtual BlockData GetDefaultState()
     {
-        BlockData vd = new BlockData();
-        return vd;
+        return new BlockData();
     }
 }
 

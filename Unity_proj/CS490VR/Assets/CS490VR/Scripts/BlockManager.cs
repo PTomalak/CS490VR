@@ -10,7 +10,7 @@ public class BlockManager : MonoBehaviour
     #region components
     JSONParser jp;
     TCPClient tc;
-    WireManager wm;
+    public WireManager wm;
     #endregion
 
     #region fields
@@ -34,7 +34,9 @@ public class BlockManager : MonoBehaviour
 
 
 
+
     ///// FROM SERVER FUNCTIONS /////
+    #region server
     // Places a block into the world
     public BMResponse PlaceBlock(PlaceData placeData)
     {
@@ -105,6 +107,14 @@ public class BlockManager : MonoBehaviour
         GameObject target = blocks[removeData.id];
         if (!target) return new BMResponse(false, "Block Not Found");
 
+        // Unload the data of this block
+        IDataLoader bl = target.GetComponent<IDataLoader>();
+        if (bl == null)
+        {
+            return new BMResponse(false, "Block had no Data Loader");
+        }
+        bl.Unload();
+
         // Destroy gameobject
         blocks.Remove(removeData.id);
         Destroy(target);
@@ -137,11 +147,12 @@ public class BlockManager : MonoBehaviour
 
         return new BMResponse(true, "ok");
     }
+    #endregion
 
 
-    
+
     ///// CLIENT SENDING METHODS /////
-    
+    #region client
     // Used by client to place a block at a given local XYZ position
     public BMResponse ClientPlaceBlock(string block, int x, int y, int z)
     {
@@ -152,7 +163,7 @@ public class BlockManager : MonoBehaviour
             PowerableData wire_data = new PowerableData();
             wire_data.position = new int[] { x, y, z };
             wire_data.id = 0;
-            //wire_data.id = x * 100 + y * 10 + z;
+            wire_data.id = x * 100 + y * 10 + z;
             wire_data.powered = false;
 
             // Prepare and send request
@@ -180,7 +191,7 @@ public class BlockManager : MonoBehaviour
 
         // Change position to the requested position and set ID to zero
         data.id = 0;
-        //data.id = x * 100 + y * 10 + z;
+        data.id = x * 100 + y * 10 + z;
         data.position = new int[3] { x, y, z };
 
         // Prepare and send request
@@ -203,8 +214,7 @@ public class BlockManager : MonoBehaviour
     public BMResponse ClientRemoveBlock(int id)
     {
         // Unnecessary check here (server can just do it), but this helps reduce client-server communication
-        GameObject target = blocks[id];
-        if (!target) return new BMResponse(false, "Block Not Found");
+        if (!blocks.ContainsKey(id) && !wm.wire_ids.ContainsKey(id)) return new BMResponse(false, "Block Not Found");
 
         // Prepare and send request
         RemoveData requestData = new RemoveData(id);
@@ -231,8 +241,7 @@ public class BlockManager : MonoBehaviour
     public BMResponse ClientUpdateBlock(int id, string block, object data)
     {
         // Unnecessary check here (server can just do it), but this helps reduce client-server communication
-        GameObject target = blocks[id];
-        if (!target) return new BMResponse(false, "Block Not Found");
+        if (!blocks.ContainsKey(id) && !wm.wire_ids.ContainsKey(id)) return new BMResponse(false, "Block Not Found");
 
         UpdateData requestData = new UpdateData(id, block, data);
         if (!jp) return new BMResponse(false, "No JSONParser");
@@ -240,6 +249,7 @@ public class BlockManager : MonoBehaviour
 
         return new BMResponse(true, "ok");
     }
+    #endregion
 
     private void Awake()
     {
@@ -303,10 +313,28 @@ public class BlockManager : MonoBehaviour
         ClientPlaceBlock("pixel", 0, 3, 0);
         yield return new WaitForFixedUpdate();
 
+        ClientPlaceBlock("wire", 1, 0, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("wire", 0, 1, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("wire", 0, 0, 1);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("wire", 2, 1, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("wire", 1, 0, 2);
+        yield return new WaitForFixedUpdate();
+
         ClientRemoveBlock(030);
         yield return new WaitForFixedUpdate();
 
         ClientPlaceBlock("toggle", 0, 4, 0);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("wire", 1, 4, 0);
         yield return new WaitForFixedUpdate();
 
         ClientUpdateBlock(040, "toggle", new { powered = true });
