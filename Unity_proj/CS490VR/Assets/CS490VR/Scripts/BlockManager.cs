@@ -195,7 +195,7 @@ public class BlockManager : MonoBehaviour
     public void ClientPlaceBlockGlobal(string block, float x, float y, float z)
     {
         Vector3 lpos = transform.InverseTransformPoint(x, y, z);
-        Vector3Int p = Vector3Int.FloorToInt(lpos);
+        Vector3Int p = Vector3Int.RoundToInt(lpos);
 
         ClientPlaceBlock(block, p.x, p.y, p.z);
     }
@@ -212,6 +212,20 @@ public class BlockManager : MonoBehaviour
         jp.SendRemoveRequest(requestData);
 
         return new BMResponse(true, "ok");
+    }
+
+    // Returns the ID of a wire at a given global position, or 0 if there isn't one.
+    public int GetWireAtGlobalPosition(float x, float y, float z)
+    {
+        Vector3 lpos = transform.InverseTransformPoint(x, y, z);
+        Vector3Int p = Vector3Int.RoundToInt(lpos);
+        int[] pos = new int[3] { p.x, p.y, p.z };
+
+        if (wm.wire_map.ContainsKey(pos))
+        {
+            return wm.wire_map[pos].id;
+        }
+        return 0;
     }
 
     public BMResponse ClientUpdateBlock(int id, string block, object data)
@@ -248,6 +262,12 @@ public class BlockManager : MonoBehaviour
         {
             jp.PerformJson(actions.Dequeue());
             ops += 1;
+        }
+
+        // Reload the wire mesh only if it has changed
+        if (wm.hasChanged)
+        {
+            wm.ReloadMesh();
         }
     }
 
@@ -286,9 +306,9 @@ public class BlockManager : MonoBehaviour
         ClientRemoveBlock(030);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("pixel", 0, 4, 0);
+        ClientPlaceBlock("toggle", 0, 4, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientUpdateBlock(040, "pixel", new { powered = true });
+        ClientUpdateBlock(040, "toggle", new { powered = true });
     }
 }

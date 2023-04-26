@@ -110,6 +110,11 @@ public class WireManager : MonoBehaviour
         return true;
     }
 
+    public void ReloadMesh()
+    {
+        mesh.ReloadMesh();
+    }
+
     private void Awake()
     {
         mesh = GetComponent<WireMesh>();
