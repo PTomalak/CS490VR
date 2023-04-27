@@ -10,6 +10,7 @@ public class WireManager : MonoBehaviour
     #endregion
 
     // Used to update mesh
+    [HideInInspector]
     public bool hasChanged;
 
     // List of wire IDs

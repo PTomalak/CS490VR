@@ -847,6 +847,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e78b554fb62afe43b54e20e1015d5ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wm: {fileID: 0}
   blockPrefabs:
   - block: block
     prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
@@ -1108,7 +1109,7 @@ GameObject:
   - component: {fileID: 1245193298489477790}
   - component: {fileID: 1245193298489477792}
   m_Layer: 0
-  m_Name: Wires
+  m_Name: Wire Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1160,7 +1161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0db52075d74fdee4695eb0dc13ca386b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wire_ids: 
+  hasChanged: 0
 --- !u!4 &6312020980895985482
 Transform:
   m_ObjectHideFlags: 0
