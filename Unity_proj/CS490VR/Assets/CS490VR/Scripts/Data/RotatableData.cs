@@ -15,7 +15,7 @@ public class RotatableData : PowerableData
         LEFT,           //Facing -x
     }
 
-    public BlockRotation rotation;
+    public BlockRotation rotation = BlockRotation.FORWARD;
 
     public override void UpdateObject(GameObject gameObject)
     {

@@ -29,3 +29,6 @@ MonoBehaviour:
     prefab: {fileID: 9009520581257770410, guid: d94d253dc12339941a64ef27951b8137,
       type: 3}
     icon: {fileID: 2800000, guid: 100196e3c78642e4a8d483100e2d72fa, type: 3}
+  - block: not_gate
+    prefab: {fileID: 734931266230115913, guid: c254984c479d90e438b45c7835111eec, type: 3}
+    icon: {fileID: 2800000, guid: c4025cf74f744414f92e5f87de38c500, type: 3}

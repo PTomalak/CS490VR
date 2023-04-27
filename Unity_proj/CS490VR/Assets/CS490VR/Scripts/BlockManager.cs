@@ -288,46 +288,19 @@ public class BlockManager : MonoBehaviour
     {
         yield return new WaitForSeconds(5);
 
-        ClientPlaceBlock("block", 0, 2, 2);
+        ClientPlaceBlock("wire", 0, 2, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("block", 2, 2, 0);
+        ClientPlaceBlock("wire", 1, 2, 1);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("block", 2, 0, 2);
+        ClientPlaceBlock("wire", 2, 2, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("block", 2, 2, 2);
+        ClientPlaceBlock("wire", 1, 2, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("pixel", 0, 0, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("pixel", 2, 0, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("pixel", 0, 2, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("pixel", 0, 0, 2);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("pixel", 0, 3, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 1, 0, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 0, 1, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 0, 0, 1);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 2, 1, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 1, 0, 2);
+        ClientPlaceBlock("wire", 1, 2, 2);
         yield return new WaitForFixedUpdate();
 
         ClientRemoveBlock(030);
@@ -342,7 +315,10 @@ public class BlockManager : MonoBehaviour
         ClientUpdateBlock(140, "wire", new { powered = true });
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("and_gate", 1, 5, 1);
+        ClientPlaceBlock("and_gate", 1, 1, 1);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("not_gate", 0, 3, 0);
         yield return new WaitForFixedUpdate();
     }
 }

@@ -2,26 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LogicGateLoader : RotatableLoader
+public class DiodeLoader : RotatableLoader
 {
     public override void Load()
     {
         base.Load();
+        // Move slightly to align the blocks onto the grid
+        transform.localPosition += RotatableData.GetRotation(data.rotation) * new Vector3(0, 0, 0.5f);
 
-        // Add wire connections at output and both inputs
+        // Add wire connections at input and output
         ModifyConnection(new Vector3Int(0, 0, 1), true);
-        ModifyConnection(new Vector3Int(-1, 0, -1), true);
-        ModifyConnection(new Vector3Int(1, 0, -1), true);
+        ModifyConnection(new Vector3Int(0, 0, 0), true);
     }
 
     public override void Unload()
     {
         base.Unload();
 
-        // Remove wire connections at output and both inputs
+        // Remove wire connections at input and output
         ModifyConnection(new Vector3Int(0, 0, 1), false);
-        ModifyConnection(new Vector3Int(-1, 0, -1), false);
-        ModifyConnection(new Vector3Int(1, 0, -1), false);
+        ModifyConnection(new Vector3Int(0, 0, 0), false);
     }
 
     private void ModifyConnection(Vector3Int a, bool add)
@@ -32,11 +32,11 @@ public class LogicGateLoader : RotatableLoader
 
         if (!bm) bm = GetComponentInParent<BlockManager>();
         int[] target = new int[3] { da.x, da.y, da.z };
-        Debug.Log(target);
         if (add)
         {
             bm.wm.connections.Add(target);
-        } else
+        }
+        else
         {
             bm.wm.connections.Remove(target);
         }

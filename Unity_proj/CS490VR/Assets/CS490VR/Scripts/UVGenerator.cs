@@ -62,18 +62,18 @@ public class UVGenerator : MonoBehaviour
         UVs[18] = UV(16, 8);   //TR
         UVs[19] = UV(16, 0);    //BR
         // Right        
-        UVs[20] = UV(16,0);     //BL
-        UVs[21] = UV(16,8);    //TL
-        UVs[22] = UV(0,8);    //TR
-        UVs[23] = UV(0,0);     //BR
+        UVs[20] = UV(16,8);     //BL
+        UVs[21] = UV(16,0);    //TL
+        UVs[22] = UV(0,0);    //TR
+        UVs[23] = UV(0,8);     //BR
         mesh.uv = UVs;
 
-        //#if UNITY_EDITOR
+#if UNITY_EDITOR
         //AssetDatabase.CreateAsset(mesh, "Assets/CS490VR/Meshes/Diode.asset");
         //AssetDatabase.SaveAssets();
-        //#endif
+#endif
     }
-    
+
     Vector2 UV(float x, float y)
     {
         int w = GetComponent<MeshRenderer>().material.mainTexture.width;
