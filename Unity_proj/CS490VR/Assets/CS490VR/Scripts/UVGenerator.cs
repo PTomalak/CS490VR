@@ -37,39 +37,41 @@ public class UVGenerator : MonoBehaviour
 
         Vector2[] UVs = new Vector2[mesh.vertices.Length];
         // Front
-        UVs[0] = UV(0, 8);      //BL
+        UVs[0] = UV(16, 8);      //BL
         UVs[1] = UV(24, 8);      //BR
-        UVs[2] = UV(0, 16);      //TL
+        UVs[2] = UV(16, 16);      //TL
         UVs[3] = UV(24, 16);      //TR
         // Top
-        UVs[4] = UV(0, 16);      //BL
-        UVs[5] = UV(24, 16);     //BR
-        UVs[8] = UV(0, 40);      //TL
-        UVs[9] = UV(24, 40);     //TR
+        UVs[4] = UV(16, 16);      //BL
+        UVs[5] = UV(16, 8);     //BR
+        UVs[8] = UV(0, 16);      //TL
+        UVs[9] = UV(0, 8);     //TR
         // Back
-        UVs[6] = UV(48, 8);     //BR
-        UVs[7] = UV(24, 8);     //BL
-        UVs[10] = UV(48, 16);    //TR
-        UVs[11] = UV(24, 16);    //TL
+        UVs[6] = UV(24, 0);     //BR
+        UVs[7] = UV(16, 0);     //BL
+        UVs[10] = UV(24, 8);    //TR
+        UVs[11] = UV(16, 8);    //TL
         // Bottom
-        UVs[12] = UV(24, 16);      //BL
-        UVs[13] = UV(24, 40);     //TL
-        UVs[14] = UV(48, 40);     //TR
-        UVs[15] = UV(48, 16);      //BR
+        UVs[12] = UV(16, 16);      //BL
+        UVs[13] = UV(0, 16);     //TL
+        UVs[14] = UV(0, 8);     //TR
+        UVs[15] = UV(16, 8);      //BR
         // Left
-        UVs[16] = UV(24, 0);     //BL
-        UVs[17] = UV(24, 8);    //TL
-        UVs[18] = UV(48, 8);   //TR
-        UVs[19] = UV(48, 0);    //BR
+        UVs[16] = UV(0,0);     //BL
+        UVs[17] = UV(0, 8);    //TL
+        UVs[18] = UV(16, 8);   //TR
+        UVs[19] = UV(16, 0);    //BR
         // Right        
-        UVs[20] = UV(0,0);     //BL
-        UVs[21] = UV(0,8);    //TL
-        UVs[22] = UV(24,8);    //TR
-        UVs[23] = UV(24,0);     //BR
+        UVs[20] = UV(16,0);     //BL
+        UVs[21] = UV(16,8);    //TL
+        UVs[22] = UV(0,8);    //TR
+        UVs[23] = UV(0,0);     //BR
         mesh.uv = UVs;
 
-        //AssetDatabase.CreateAsset(mesh, "Assets/CS490VR/Meshes/LogicGate.asset");
+        //#if UNITY_EDITOR
+        //AssetDatabase.CreateAsset(mesh, "Assets/CS490VR/Meshes/Diode.asset");
         //AssetDatabase.SaveAssets();
+        //#endif
     }
     
     Vector2 UV(float x, float y)

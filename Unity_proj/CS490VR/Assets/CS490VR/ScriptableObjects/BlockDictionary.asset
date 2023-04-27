@@ -12,3 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58385c248f02f394caa65230bf5fc0c5, type: 3}
   m_Name: BlockDictionary
   m_EditorClassIdentifier: 
+  LIST:
+  - block: block
+    prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
+      type: 3}
+    icon: {fileID: 2800000, guid: e19463b84782a4647b67d58e46552e53, type: 3}
+  - block: pixel
+    prefab: {fileID: 1079769595136392027, guid: 2aaa0a869eb1f694e94d0aca7ba93e7b,
+      type: 3}
+    icon: {fileID: 2800000, guid: 93612241957d1ff4c8c23a3dcca28224, type: 3}
+  - block: toggle
+    prefab: {fileID: 8348371863008964499, guid: fd32d2ecf44b8cf4d80f57e0c2639e74,
+      type: 3}
+    icon: {fileID: 2800000, guid: efa1f87587898834d9b0a6bdea030089, type: 3}
+  - block: and_gate
+    prefab: {fileID: 9009520581257770410, guid: d94d253dc12339941a64ef27951b8137,
+      type: 3}
+    icon: {fileID: 2800000, guid: 100196e3c78642e4a8d483100e2d72fa, type: 3}
