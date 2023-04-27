@@ -4,13 +4,6 @@ using UnityEngine;
 
 public class PowerableLoader : MonoBehaviour, IDataLoader
 {
-    // Two materials (textures) for whether it is on or off
-    [SerializeField]
-    public Material ON_MATERIAL;
-    [SerializeField]
-    public Material OFF_MATERIAL;
-
-    // Store the powerable data (which references this component for textures)
     public PowerableData data;
 
     // Components

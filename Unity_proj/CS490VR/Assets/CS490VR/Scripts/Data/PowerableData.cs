@@ -9,12 +9,13 @@ public class PowerableData : BlockData
     public bool powered = false;
 
     // Caching GetComponent calls (not serialized)
-    private PowerableLoader pl;
+    [SerializeField]
+    private PoweredTextures pl;
 
     public override void UpdateObject(GameObject gameObject)
     {
         base.UpdateObject(gameObject);
-        if (!pl) pl = gameObject.GetComponent<PowerableLoader>();
+        if (!pl) pl = gameObject.GetComponent<PoweredTextures>();
         gameObject.GetComponent<Renderer>().material = (powered) ? pl.ON_MATERIAL : pl.OFF_MATERIAL;
     }
 

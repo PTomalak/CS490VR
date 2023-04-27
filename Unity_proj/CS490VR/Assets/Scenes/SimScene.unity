@@ -847,7 +847,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e78b554fb62afe43b54e20e1015d5ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wm: {fileID: 0}
+  wm: {fileID: 1245193298489477792}
   blockPrefabs:
   - block: block
     prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
@@ -857,6 +857,9 @@ MonoBehaviour:
       type: 3}
   - block: toggle
     prefab: {fileID: 8348371863008964499, guid: fd32d2ecf44b8cf4d80f57e0c2639e74,
+      type: 3}
+  - block: and_gate
+    prefab: {fileID: 9009520581257770410, guid: d94d253dc12339941a64ef27951b8137,
       type: 3}
 --- !u!114 &1772401868
 MonoBehaviour:

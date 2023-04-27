@@ -34,10 +34,6 @@ public class UVGenerator : MonoBehaviour
             corner += (uv.x == 0) ? "L" : "R";
             uv_list += corner + "\n";
         }
-        Debug.Log(uv_list);
-
-        float x_scale = 0.6666f;
-        float y_scale = 1;
 
         Vector2[] UVs = new Vector2[mesh.vertices.Length];
         // Front
@@ -72,8 +68,8 @@ public class UVGenerator : MonoBehaviour
         UVs[23] = UV(24,0);     //BR
         mesh.uv = UVs;
 
-        AssetDatabase.CreateAsset(mesh, "Assets/CS490VR/Meshes/LogicGate.asset");
-        AssetDatabase.SaveAssets();
+        //AssetDatabase.CreateAsset(mesh, "Assets/CS490VR/Meshes/LogicGate.asset");
+        //AssetDatabase.SaveAssets();
     }
     
     Vector2 UV(float x, float y)

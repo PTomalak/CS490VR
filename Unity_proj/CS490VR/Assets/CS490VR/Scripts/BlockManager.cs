@@ -130,7 +130,15 @@ public class BlockManager : MonoBehaviour
         // See if we are updating a wire and intercept the update
         if (wm.wire_ids.ContainsKey(updateData.id))
         {
-            PowerableData wire_data = JsonConvert.DeserializeObject<PowerableData>(blockJson);
+            // Obtain our existing data
+            WireManager.WireData existing_data = wm.wire_map[wm.wire_ids[updateData.id]];
+            PowerableData wire_data = new PowerableData();
+            wire_data.id = existing_data.id;
+            wire_data.position = wm.wire_ids[updateData.id];
+            wire_data.powered = existing_data.powered;
+
+            // Obtain modified version of existing data and update wires
+            JsonConvert.PopulateObject(blockJson, wire_data);
             bool res = wm.UpdateWire(updateData.id, wire_data);
             return new BMResponse(res, (res) ? "ok (wire)" : "Wire Manager couldn't update wire");
         }
@@ -261,7 +269,7 @@ public class BlockManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //StartCoroutine(BlockTest());
+        StartCoroutine(BlockTest());
     }
 
     private void FixedUpdate()
@@ -337,6 +345,10 @@ public class BlockManager : MonoBehaviour
         ClientPlaceBlock("wire", 1, 4, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientUpdateBlock(040, "toggle", new { powered = true });
+        ClientUpdateBlock(140, "wire", new { powered = true });
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("and_gate", 1, 5, 1);
+        yield return new WaitForFixedUpdate();
     }
 }
