@@ -23,13 +23,7 @@ public class BlockManager : MonoBehaviour
     // Interact with in editor to add string / gameObject pairs
     // The string is the block's name, the gameObject is that block's prefab
     [SerializeField]
-    public List<BlockPrefabEntry> blockPrefabs;
-    [System.Serializable]
-    public struct BlockPrefabEntry
-    {
-        public string block;
-        public GameObject prefab;
-    }
+    public BlockDictionary block_dict;
     #endregion
 
 
@@ -63,8 +57,8 @@ public class BlockManager : MonoBehaviour
         }
 
         // Instantiate this voxel if we have a prefab for it
-        BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == placeData.block);
-        if (blockPrefabs.Contains(e))
+        BlockDictionary.BlockDictionaryObject e = block_dict.LIST.Find((v) => v.block == placeData.block);
+        if (block_dict.LIST.Contains(e))
         {
             // Spawn the object in the world and make its name readable in the editor
             GameObject newObject = Instantiate(e.prefab, transform);
@@ -183,8 +177,8 @@ public class BlockManager : MonoBehaviour
         }
 
         // Find the prefab, data loader, and data
-        BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == block);
-        if (!blockPrefabs.Contains(e)) return new BMResponse(false, "No Prefab for: " + block);
+        BlockDictionary.BlockDictionaryObject e = block_dict.LIST.Find((v) => v.block == block);
+        if (!block_dict.LIST.Contains(e)) return new BMResponse(false, "No Prefab for: " + block);
 
         GameObject prefab = e.prefab;
         IDataLoader dl = prefab.GetComponent<IDataLoader>();
