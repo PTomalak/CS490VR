@@ -17,18 +17,77 @@ MonoBehaviour:
     prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
       type: 3}
     icon: {fileID: 2800000, guid: e19463b84782a4647b67d58e46552e53, type: 3}
+    enabled: 1
   - block: pixel
     prefab: {fileID: 1079769595136392027, guid: 2aaa0a869eb1f694e94d0aca7ba93e7b,
       type: 3}
     icon: {fileID: 2800000, guid: 93612241957d1ff4c8c23a3dcca28224, type: 3}
+    enabled: 1
   - block: toggle
     prefab: {fileID: 8348371863008964499, guid: fd32d2ecf44b8cf4d80f57e0c2639e74,
       type: 3}
     icon: {fileID: 2800000, guid: efa1f87587898834d9b0a6bdea030089, type: 3}
+    enabled: 1
+  - block: Clock
+    prefab: {fileID: 1729732562956071229, guid: fad76894c91954347bf7c0d80cff316c,
+      type: 3}
+    icon: {fileID: 2800000, guid: 6c1ddf45ff49ec6468b5f4dc0637b862, type: 3}
+    enabled: 0
+  - block: pulse
+    prefab: {fileID: 3633732729333439380, guid: 86c88f02dc8deae4093376e2dfd8121c,
+      type: 3}
+    icon: {fileID: 2800000, guid: 0b583effd5a648a47931e7a6fd21ccc4, type: 3}
+    enabled: 0
+  - block: diode
+    prefab: {fileID: 5896725064193185941, guid: 51cfab407a6452c48900df466b684cef,
+      type: 3}
+    icon: {fileID: 2800000, guid: 88bf4359bdf2860449947813c359a1e5, type: 3}
+    enabled: 1
+  - block: not_gate
+    prefab: {fileID: 734931266230115913, guid: c254984c479d90e438b45c7835111eec, type: 3}
+    icon: {fileID: 2800000, guid: c4025cf74f744414f92e5f87de38c500, type: 3}
+    enabled: 1
   - block: and_gate
     prefab: {fileID: 9009520581257770410, guid: d94d253dc12339941a64ef27951b8137,
       type: 3}
     icon: {fileID: 2800000, guid: 100196e3c78642e4a8d483100e2d72fa, type: 3}
-  - block: not_gate
-    prefab: {fileID: 734931266230115913, guid: c254984c479d90e438b45c7835111eec, type: 3}
-    icon: {fileID: 2800000, guid: c4025cf74f744414f92e5f87de38c500, type: 3}
+    enabled: 1
+  - block: nand_gate
+    prefab: {fileID: 4918228854758183847, guid: 8957e605d3431c8498352fa40584541f,
+      type: 3}
+    icon: {fileID: 2800000, guid: ad9fcd9041d4d8a42b49511239c42baf, type: 3}
+    enabled: 0
+  - block: or_gate
+    prefab: {fileID: 1000686929664426853, guid: 907df31ed2bd8c84e98204d2455d4d04,
+      type: 3}
+    icon: {fileID: 2800000, guid: ea2ef8d658470cf4babc30d66d54086a, type: 3}
+    enabled: 0
+  - block: nor_gate
+    prefab: {fileID: 6001251101387403167, guid: 1b09e80d6c68b7f4e9f918a0951553bd,
+      type: 3}
+    icon: {fileID: 2800000, guid: 087a6e6c18079d245a21236f2354aa36, type: 3}
+    enabled: 0
+  - block: xor_gate
+    prefab: {fileID: 1506871255414862292, guid: 6f81d40e4bd0a2b488d531f02d89b2fe,
+      type: 3}
+    icon: {fileID: 2800000, guid: a549ed81872ae1b4a93e7eced4dfc998, type: 3}
+    enabled: 0
+  - block: xnor_gate
+    prefab: {fileID: 781537993929538432, guid: 4f0aaef2954f86a4fa0a18c2bda3b88c, type: 3}
+    icon: {fileID: 2800000, guid: cc3eaeb63593f6148bbcdb4a7595a714, type: 3}
+    enabled: 0
+  - block: toggle_latch
+    prefab: {fileID: 6570046670677185062, guid: 56417a6c01fe9bf4d8944e0e8f2715ec,
+      type: 3}
+    icon: {fileID: 2800000, guid: a74e78fbf00433f42aee2e5e44f90aba, type: 3}
+    enabled: 0
+  - block: pulse_latch
+    prefab: {fileID: 4609437560015391115, guid: 416d64a30296a454f96e3ac7dc2a342b,
+      type: 3}
+    icon: {fileID: 2800000, guid: 20a4e518e55b4884295b40aa4a6d28c1, type: 3}
+    enabled: 0
+  - block: memory_latch
+    prefab: {fileID: 3790072465495330943, guid: 944456cf0995fb54b9b476318b11e52a,
+      type: 3}
+    icon: {fileID: 2800000, guid: 4dec9a878c0b8f04d95625686094f451, type: 3}
+    enabled: 0

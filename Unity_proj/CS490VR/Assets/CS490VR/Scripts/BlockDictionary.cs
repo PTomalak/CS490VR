@@ -15,5 +15,6 @@ public class BlockDictionary : ScriptableObject
         public string block;
         public GameObject prefab;
         public Texture icon;
+        public bool enabled = true;
     }
 }
