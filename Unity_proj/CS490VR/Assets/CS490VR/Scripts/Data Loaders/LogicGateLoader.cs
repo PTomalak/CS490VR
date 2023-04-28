@@ -35,10 +35,10 @@ public class LogicGateLoader : RotatableLoader
         Debug.Log(target);
         if (add)
         {
-            bm.wm.connections.Add(target);
+            bm.wm.AddConnection(target);
         } else
         {
-            bm.wm.connections.Remove(target);
+            bm.wm.RemoveConnection(target);
         }
     }
 }

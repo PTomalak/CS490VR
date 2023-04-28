@@ -34,11 +34,11 @@ public class DiodeLoader : RotatableLoader
         int[] target = new int[3] { da.x, da.y, da.z };
         if (add)
         {
-            bm.wm.connections.Add(target);
+            bm.wm.AddConnection(target);
         }
         else
         {
-            bm.wm.connections.Remove(target);
+            bm.wm.RemoveConnection(target);
         }
     }
 }

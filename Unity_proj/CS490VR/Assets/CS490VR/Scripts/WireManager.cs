@@ -111,6 +111,18 @@ public class WireManager : MonoBehaviour
         return true;
     }
 
+    public void AddConnection(int[] c)
+    {
+        connections.Add(c);
+        hasChanged = true;
+    }
+
+    public void RemoveConnection(int[] c)
+    {
+        connections.Remove(c);
+        hasChanged = true;
+    }
+
     public void ReloadMesh()
     {
         mesh.ReloadMesh();
@@ -119,20 +131,5 @@ public class WireManager : MonoBehaviour
     private void Awake()
     {
         mesh = GetComponent<WireMesh>();
-    }
-
-    private void Start()
-    {
-        //AddWire(0, 0, 0, 0, false);
-        //AddWire(0, 1, 0, 1, false);
-        //AddWire(0, 1, 1, 2, false);
-        //AddWire(1, 1, 1, 3, false);
-        //AddWire(-1, 0, 0, 4, false);
-        //AddWire(2, 2, 2, 5, true);
-        //AddWire(3, 2, 2, 6, true);
-        //AddWire(3, 2, 3, 7, true);
-        //AddWire(3, 3, 3, 8, true);
-        //connections.Add(new int[3] { 3, 4, 3 });
-        //
     }
 }

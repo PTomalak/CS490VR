@@ -17,14 +17,14 @@ public class PowerableLoader : MonoBehaviour, IDataLoader
 
         // Add wire connection at our position
         if (!bm) bm = GetComponentInParent<BlockManager>();
-        bm.wm.connections.Add(data.position);
+        bm.wm.AddConnection(data.position);
     }
 
     public void Unload()
     {
         // Remove wire connection at our position
         if (!bm) bm = GetComponentInParent<BlockManager>();
-        bm.wm.connections.Remove(data.position);
+        bm.wm.RemoveConnection(data.position);
     }
 
     public BlockData GetData()
