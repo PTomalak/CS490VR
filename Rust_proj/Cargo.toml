@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 cgmath = { version = "0.18.0", features = ["serde"] }
-kdtree = { version = "0.7.0", features = ["serde", "serde_derive"] }
 log = "0.4.17"
 petgraph = { version = "0.6.3", features = ["serde-1"] }
 serde = { version = "1.0.158", features = ["derive"] }
