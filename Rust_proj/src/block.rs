@@ -7,11 +7,12 @@ use serde::{Deserialize, Serialize};
 use crate::grid::Coord;
 
 pub type VoxelID = String;
+pub type PowerState = bool;
 pub type Color = (u8, u8, u8, u8);
 
 const VOXEL_CIRCUIT: &str = "!";
 
-fn circuit_voxel(name: &str) -> String
+pub fn circuit_voxel(name: &str) -> String
 {
     format!("{}{}", VOXEL_CIRCUIT, name)
 }
@@ -21,7 +22,7 @@ pub fn is_circuit_voxel(name: &str) -> bool
     name.starts_with(VOXEL_CIRCUIT)
 }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Orient
 {
     FORWARD,
@@ -39,33 +40,35 @@ impl Default for Orient
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelPowered
 {
-    powered: bool,
+    pub powered: bool,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelBlock
 {
-    color: Color,
+    pub color: Color,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelClock
 {
-    frequency: u32,
-    start_tick: u32,
+    pub rate: u32,
+    pub start_tick: u32,
+    pub powered: bool,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelPulse
 {
-    powered: bool,
-    pulse_ticks: u32,
+    pub start_tick: u32,
+    pub pulse_ticks: u32,
+    pub powered: bool,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "block", content = "data")]
 pub enum Block
 {
@@ -97,6 +100,37 @@ impl Default for Block
 
 impl Block
 {
+    /// Get this block's power state (if applicable)
+    pub fn get_power(&self) -> Option<bool> {
+        match self {
+            Block::Wire(data) => Some(data.powered),
+            Block::Toggle(data) => Some(data.powered),
+            Block::ANDGate(data) => Some(data.powered),
+            Block::ORGate(data) => Some(data.powered),
+            Block::NOTGate(data) => Some(data.powered),
+            Block::Clock(data) => Some(data.powered),
+            Block::Pulse(data) => Some(data.powered),
+            _ => None
+        }
+    }
+
+    /// Get all of the circuit voxels belonging to this block
+    pub fn get_circuit_voxels(&self) -> Vec<(VoxelID, Coord)> {
+        self.get_structure()
+            .iter()
+            .filter(|(id, _)| is_circuit_voxel(id))
+            .map(|(voxel_id, coord)| (voxel_id.clone(), *coord))
+            .collect()
+    }
+
+    /// Return true if the block is a circuit block (i.e. has at least one circuit voxel)
+    pub fn is_circuit_block(&self) -> bool {
+        self.get_structure()
+            .iter()
+            .position(|(id, _)| is_circuit_voxel(id))
+            .is_some()
+    }
+
     /// Return the voxels that make up the block
     /// Voxels whose names start with an exclamation are considered as part of the circuit
     pub fn get_structure(&self) -> HashMap<VoxelID, Coord> {

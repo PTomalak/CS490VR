@@ -28,18 +28,20 @@ pub const SERVER_DIRECTORY: &str = "./generated/";
 pub const MAX_INCOMING_SIZE: usize = 1 << 16;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SaveSettings
+pub struct WorldSettings
 {
-    path: PathBuf,
-    rate: Duration,
+    save_path: PathBuf,
+    autosave_duration: Duration,
+    tick_duration: Duration,
 }
 
-impl Default for SaveSettings
+impl Default for WorldSettings
 {
     fn default() -> Self {
         Self {
-            path: PathBuf::from(format!("{}{}.world", SERVER_DIRECTORY, UNIX_EPOCH.elapsed().unwrap().as_millis())),
-            rate: Duration::new(10, 0),
+            save_path: PathBuf::from(format!("{}{}.world", SERVER_DIRECTORY, UNIX_EPOCH.elapsed().unwrap().as_millis())),
+            autosave_duration: Duration::from_secs(10),
+            tick_duration: Duration::from_millis(100),
         }
     }
 }
@@ -116,7 +118,7 @@ pub enum Protocol
 pub struct Network
 {
     pub world: World,
-    pub saves: SaveSettings,
+    pub saves: WorldSettings,
 
     clients: Clients,
 
@@ -137,18 +139,27 @@ impl Network
 {
     /// Handles combined messages from clients (only one instance of this function)
     /// Communicates with the client handlers via message passing
-    fn server_handler(queue: MessageReceiver, world: World, clients: Clients, save_settings: SaveSettings) -> Option<()> {
+    fn server_handler(queue: MessageReceiver, world: World, clients: Clients, settings: WorldSettings) -> Option<()> {
         let mut w = world.lock().ok()?;
         let mut last_save = Instant::now();
+        let mut last_tick = Instant::now();
 
         // Process global message queue (from all clients)
         for message in queue.lock().unwrap().iter() {
             let client_id = message.0;
 
             // Check if a save needs to be performed
-            if last_save.elapsed() >= save_settings.rate {
-                w.save(&save_settings.path);
+            if last_save.elapsed() >= settings.autosave_duration {
+                w.save(&settings.save_path);
                 last_save = Instant::now();
+            }
+
+            // Check if a tick needs to be simulated
+            if last_tick.elapsed() >= settings.tick_duration {
+                let _updates = w.simulate_tick();
+                last_tick = Instant::now();
+
+                // TODO: Send updates to clients
             }
 
             // Process message
@@ -270,25 +281,6 @@ impl Network
                 .map(|e| {
                     serde_json::from_slice::<Protocol>(&buffer[..e])
                 });
-
-            // Handle (some) communication errors
-            // let message = serde_json::from_reader::<_, Protocol>(&stream);
-            /*
-            if let Err(e) = &message {
-                if e.is_eof() {
-                    debug!("client {} reached end of file", addr);
-                    break;
-                }
-                if e.is_syntax() || e.is_data() {
-                    debug!("client {} sent bad data", addr);
-                    break;
-                }
-
-                if !e.to_string().starts_with("Resource") {
-                    dbg!(e.to_string());
-                }
-            }
-             */
 
             // Check if any server -> client action need to be sent (non-blocking after existing messages received)
             for sv_to_cl_message in inbound.try_iter() {
