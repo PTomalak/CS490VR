@@ -5,8 +5,12 @@ using UnityEngine;
 
 public class JSONParser : MonoBehaviour
 {
-    BlockManager bm;
-    TCPClient tc;
+    public PlayerManager pm;    // MUST SET THIS IN UNITY
+    public BlockManager bm;
+    public TCPClient tc;
+
+    // Queue to transfer JSON commands from background thread to maing thread
+    public Queue<string> incomingActions = new Queue<string>();
 
     // Classes for interacting with actions in JSON
     public class Action
@@ -104,9 +108,37 @@ public class JSONParser : MonoBehaviour
         tc = GetComponent<TCPClient>();
     }
 
+    private void Update()
+    {
+        // Perform up to a maximum number of queued operations per frame
+        int ops = 0;
+        while (incomingActions.Count > 0 && ops < 50)
+        {
+            HandleMessage(incomingActions.Dequeue());
+            ops += 1;
+        }
+    }
+
+
+    // Determine which type of request a given JSON is and perform the appropriate action with it
+    public void HandleMessage(string json)
+    {
+        PlayerManager.PlayerData[] p_data = new PlayerManager.PlayerData[0] { };
+        JsonConvert.PopulateObject(json, p_data);
+
+        if (p_data.Length > 0)
+        {
+            pm.UpdatePlayerList(p_data);
+        } else
+        {
+            PerformAction(json);
+        }
+    }
+
+
     // Take a request and call attached BlockManager's appropriate action
     // Also sends a BMResponse reflecting the success of the action
-    public void PerformJson(string json)
+    public void PerformAction(string json)
     {
         Action action = JsonConvert.DeserializeObject<Action>(json);
         if (action.action == null) return;  // Do nothing for a non-action

@@ -17,15 +17,9 @@ public class BlockManager : MonoBehaviour
     // Stores all blocks (not voxels) by ID
     public Dictionary<int, GameObject> blocks = new Dictionary<int, GameObject>();
 
-    // Queue to transfer block placing commands from background thread to maing thread
-    public Queue<string> incomingActions = new Queue<string>();
-
     // Dictionary associating blocks with their prefabs (shared w/ inventory)
     public BlockDictionary block_dict;
     #endregion
-
-
-
 
     ///// FROM SERVER FUNCTIONS /////
     #region server
@@ -266,14 +260,6 @@ public class BlockManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Perform up to a maximum number of queued operations per frame
-        int ops = 0;
-        while(incomingActions.Count > 0 && ops < 50)
-        {
-            jp.PerformJson(incomingActions.Dequeue());
-            ops += 1;
-        }
-
         // Reload the wire mesh only if it has changed
         if (wm.hasChanged)
         {

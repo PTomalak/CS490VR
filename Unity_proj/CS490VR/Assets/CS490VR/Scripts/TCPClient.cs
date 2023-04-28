@@ -10,7 +10,6 @@ public class TCPClient : MonoBehaviour
 {
     #region components
     JSONParser jp;
-    BlockManager bm;
     #endregion
 
     #region fields
@@ -27,7 +26,6 @@ public class TCPClient : MonoBehaviour
     void Awake()
     {
         jp = GetComponent<JSONParser>();
-        bm = GetComponent<BlockManager>();
         Connect(IP, PORT);
     }
 
@@ -44,7 +42,6 @@ public class TCPClient : MonoBehaviour
         IP = ip;
         PORT = port;
         if (!jp) return;
-        if (!bm) return;
 
         try
         {
@@ -83,8 +80,8 @@ public class TCPClient : MonoBehaviour
                         // Split up the server message in case its multiple JSONs
                         foreach (string message in serverMessage.Replace("}{", "}||{").Split("||"))
                         {
-                            // Enqueue the next action
-                            bm.incomingActions.Enqueue(serverMessage);
+                            // Pass the message to the JSON Parser
+                            jp.incomingActions.Enqueue(message);
                         }
                     }
                 }
