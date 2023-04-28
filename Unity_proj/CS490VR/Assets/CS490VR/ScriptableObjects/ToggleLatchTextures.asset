@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 935f73c6d43d8284193f8a2bfdd1a182, type: 3}
+  m_Name: ToggleLatchTextures
+  m_EditorClassIdentifier: 
+  ON_MATERIAL: {fileID: 2100000, guid: a7af5f29ff7e52a4cae4463ac06577db, type: 2}
+  OFF_MATERIAL: {fileID: 2100000, guid: 1251ba0d8a9f67a46a69ca24e556da4c, type: 2}

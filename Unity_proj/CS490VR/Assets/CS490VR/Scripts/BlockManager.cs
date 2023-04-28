@@ -23,13 +23,7 @@ public class BlockManager : MonoBehaviour
     // Interact with in editor to add string / gameObject pairs
     // The string is the block's name, the gameObject is that block's prefab
     [SerializeField]
-    public List<BlockPrefabEntry> blockPrefabs;
-    [System.Serializable]
-    public struct BlockPrefabEntry
-    {
-        public string block;
-        public GameObject prefab;
-    }
+    public BlockDictionary block_dict;
     #endregion
 
 
@@ -63,8 +57,8 @@ public class BlockManager : MonoBehaviour
         }
 
         // Instantiate this voxel if we have a prefab for it
-        BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == placeData.block);
-        if (blockPrefabs.Contains(e))
+        BlockDictionary.BlockDictionaryObject e = block_dict.LIST.Find((v) => v.block == placeData.block);
+        if (block_dict.LIST.Contains(e))
         {
             // Spawn the object in the world and make its name readable in the editor
             GameObject newObject = Instantiate(e.prefab, transform);
@@ -130,7 +124,15 @@ public class BlockManager : MonoBehaviour
         // See if we are updating a wire and intercept the update
         if (wm.wire_ids.ContainsKey(updateData.id))
         {
-            PowerableData wire_data = JsonConvert.DeserializeObject<PowerableData>(blockJson);
+            // Obtain our existing data
+            WireManager.WireData existing_data = wm.wire_map[wm.wire_ids[updateData.id]];
+            PowerableData wire_data = new PowerableData();
+            wire_data.id = existing_data.id;
+            wire_data.position = wm.wire_ids[updateData.id];
+            wire_data.powered = existing_data.powered;
+
+            // Obtain modified version of existing data and update wires
+            JsonConvert.PopulateObject(blockJson, wire_data);
             bool res = wm.UpdateWire(updateData.id, wire_data);
             return new BMResponse(res, (res) ? "ok (wire)" : "Wire Manager couldn't update wire");
         }
@@ -175,8 +177,8 @@ public class BlockManager : MonoBehaviour
         }
 
         // Find the prefab, data loader, and data
-        BlockPrefabEntry e = blockPrefabs.Find((v) => v.block == block);
-        if (!blockPrefabs.Contains(e)) return new BMResponse(false, "No Prefab for: " + block);
+        BlockDictionary.BlockDictionaryObject e = block_dict.LIST.Find((v) => v.block == block);
+        if (!block_dict.LIST.Contains(e)) return new BMResponse(false, "No Prefab for: " + block);
 
         GameObject prefab = e.prefab;
         IDataLoader dl = prefab.GetComponent<IDataLoader>();
@@ -261,7 +263,7 @@ public class BlockManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //StartCoroutine(BlockTest());
+        StartCoroutine(BlockTest());
     }
 
     private void FixedUpdate()
@@ -286,46 +288,19 @@ public class BlockManager : MonoBehaviour
     {
         yield return new WaitForSeconds(5);
 
-        ClientPlaceBlock("block", 0, 2, 2);
+        ClientPlaceBlock("wire", 0, 2, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("block", 2, 2, 0);
+        ClientPlaceBlock("wire", 1, 2, 1);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("block", 2, 0, 2);
+        ClientPlaceBlock("wire", 2, 2, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("block", 2, 2, 2);
+        ClientPlaceBlock("wire", 1, 2, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientPlaceBlock("pixel", 0, 0, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("pixel", 2, 0, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("pixel", 0, 2, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("pixel", 0, 0, 2);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("pixel", 0, 3, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 1, 0, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 0, 1, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 0, 0, 1);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 2, 1, 0);
-        yield return new WaitForFixedUpdate();
-
-        ClientPlaceBlock("wire", 1, 0, 2);
+        ClientPlaceBlock("wire", 1, 2, 2);
         yield return new WaitForFixedUpdate();
 
         ClientRemoveBlock(030);
@@ -337,6 +312,13 @@ public class BlockManager : MonoBehaviour
         ClientPlaceBlock("wire", 1, 4, 0);
         yield return new WaitForFixedUpdate();
 
-        ClientUpdateBlock(040, "toggle", new { powered = true });
+        ClientUpdateBlock(140, "wire", new { powered = true });
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("and_gate", 1, 1, 1);
+        yield return new WaitForFixedUpdate();
+
+        ClientPlaceBlock("not_gate", 0, 3, 0);
+        yield return new WaitForFixedUpdate();
     }
 }
