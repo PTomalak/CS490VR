@@ -15,9 +15,9 @@ public class JSONParser : MonoBehaviour
     }
     public class PlaceAction : Action
     {
-        public PlaceData data;
+        public PlaceData[] data;
 
-        public PlaceAction(string action, PlaceData data)
+        public PlaceAction(string action, PlaceData[] data)
         {
             this.action = action;
             this.data = data;
@@ -25,9 +25,9 @@ public class JSONParser : MonoBehaviour
     }
     public class UpdateAction : Action
     {
-        public UpdateData data;
+        public UpdateData[] data;
 
-        public UpdateAction(string action, UpdateData data)
+        public UpdateAction(string action, UpdateData[] data)
         {
             this.action = action;
             this.data = data;
@@ -35,9 +35,9 @@ public class JSONParser : MonoBehaviour
     }
     public class RemoveAction : Action
     {
-        public RemoveData data;
+        public RemoveData[] data;
 
-        public RemoveAction(string action, RemoveData data)
+        public RemoveAction(string action, RemoveData[] data)
         {
             this.action = action;
             this.data = data;
@@ -113,31 +113,71 @@ public class JSONParser : MonoBehaviour
         if (!bm) return;
 
 
-        // Unpack the BlockData for a place/update action
-        BMResponse res = action.action switch
-        {
-            "place" => bm.PlaceBlock(JsonConvert.DeserializeObject<PlaceAction>(json).data),
-            "remove" => bm.RemoveBlock(JsonConvert.DeserializeObject<RemoveAction>(json).data),
-            "update" => bm.UpdateBlock(JsonConvert.DeserializeObject<UpdateAction>(json).data),
-            _ => new BMResponse(false, "Invalid Action"),// Nothing performed for invalid JSON
-        };
-
+        // Depending on the action, unpack the JSON into the correct set of actions
         if (!tc) return;
-        tc.SendJson(JsonUtility.ToJson(res));
+        switch (action.action)
+        {
+            case "place":
+                {
+                    PlaceAction act = JsonConvert.DeserializeObject<PlaceAction>(json);
+                    foreach (PlaceData data in act.data)
+                    {
+                        BMResponse resp = bm.PlaceBlock(data);
+                        tc.SendJson(JsonUtility.ToJson(resp));
+                    }
+                }
+                break;
+            case "remove":
+                {
+                    RemoveAction act = JsonConvert.DeserializeObject<RemoveAction>(json);
+                    foreach (RemoveData data in act.data)
+                    {
+                        BMResponse resp = bm.RemoveBlock(data);
+                        tc.SendJson(JsonUtility.ToJson(resp));
+                    }
+                }
+                break;
+            case "update":
+                {
+                    UpdateAction act = JsonConvert.DeserializeObject<UpdateAction>(json);
+                    foreach (UpdateData data in act.data)
+                    {
+                        BMResponse resp = bm.UpdateBlock(data);
+                        tc.SendJson(JsonUtility.ToJson(resp));
+                    }
+                }
+                break;
+            default:
+                BMResponse res = new BMResponse(false, "Invalid Action");
+                tc.SendJson(JsonUtility.ToJson(res));
+                break;
+        }
     }
 
     // Convert local request into JSON and send request
     public void SendPlaceRequest(PlaceData data)
+    {
+        SendPlaceRequest(new PlaceData[1] { data });
+    }
+    public void SendPlaceRequest(PlaceData[] data)
     {
         if (!tc) return;
         tc.SendJson(JsonConvert.SerializeObject(new PlaceAction("place", data)));
     }
     public void SendRemoveRequest(RemoveData data)
     {
+        SendRemoveRequest(new RemoveData[1] { data });
+    }
+    public void SendRemoveRequest(RemoveData[] data)
+    {
         if (!tc) return;
         tc.SendJson(JsonConvert.SerializeObject(new RemoveAction("remove", data)));
     }
     public void SendUpdateRequest(UpdateData data)
+    {
+        SendUpdateRequest(new UpdateData[1] { data });
+    }
+    public void SendUpdateRequest(UpdateData[] data)
     {
         if (!tc) return;
         tc.SendJson(JsonConvert.SerializeObject(new UpdateAction("update", data)));

@@ -84,7 +84,7 @@ public class TCPClient : MonoBehaviour
                         foreach (string message in serverMessage.Replace("}{", "}||{").Split("||"))
                         {
                             // Enqueue the next action
-                            bm.actions.Enqueue(serverMessage);
+                            bm.incomingActions.Enqueue(serverMessage);
                         }
                     }
                 }

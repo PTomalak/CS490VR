@@ -18,11 +18,9 @@ public class BlockManager : MonoBehaviour
     public Dictionary<int, GameObject> blocks = new Dictionary<int, GameObject>();
 
     // Queue to transfer block placing commands from background thread to maing thread
-    public Queue<string> actions = new Queue<string>();
+    public Queue<string> incomingActions = new Queue<string>();
 
-    // Interact with in editor to add string / gameObject pairs
-    // The string is the block's name, the gameObject is that block's prefab
-    [SerializeField]
+    // Dictionary associating blocks with their prefabs (shared w/ inventory)
     public BlockDictionary block_dict;
     #endregion
 
@@ -270,9 +268,9 @@ public class BlockManager : MonoBehaviour
     {
         // Perform up to a maximum number of queued operations per frame
         int ops = 0;
-        while(actions.Count > 0 && ops < 50)
+        while(incomingActions.Count > 0 && ops < 50)
         {
-            jp.PerformJson(actions.Dequeue());
+            jp.PerformJson(incomingActions.Dequeue());
             ops += 1;
         }
 
