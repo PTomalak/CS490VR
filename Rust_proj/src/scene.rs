@@ -8,7 +8,7 @@ use petgraph::dot::Dot;
 use petgraph::graph::NodeIndex;
 use serde::{Deserialize, Serialize};
 
-use crate::block::{Block, circuit_voxel, is_circuit_voxel, Orient, PowerState, VoxelID};
+use crate::block::{Block, circuit_voxel, is_circuit_voxel, Orient, PowerState, VoxelClock, VoxelID, VoxelPowered};
 use crate::grid::{Coord, Grid};
 
 pub type InstanceID = u32;
@@ -62,6 +62,16 @@ impl Scene
             .collect()
     }
 
+    /// Determine if any of the given node's neighbors are powered
+    fn get_neighbor_power(&self, node_id: NodeID) -> PowerState {
+        self.circuit
+            .neighbors(node_id)
+            .any(|e| {
+                let (id, _, _) = self.circuit.node_weight(e).unwrap();
+                self.blocks[id].2.get_non_wire_power().unwrap_or(OFF)
+            })
+    }
+
     /// Save the circuit to a `.dot` file
     ///
     /// Requires the `dot` program to be in the system `PATH`
@@ -70,7 +80,7 @@ impl Scene
         let d = Dot::with_config(&self.circuit, &[]);
         std::fs::write(&path, format!("{:?}", d)).unwrap();
         Command::new("dot")
-            .args(["-Tps", path.to_str().unwrap(), "-o", &format!("{}.pdf", path.to_str().unwrap())])
+            .args(["-Tpng", path.to_str().unwrap(), "-o", &format!("{}.png", path.to_str().unwrap())])
             .spawn()
             .unwrap();
     }
@@ -122,11 +132,11 @@ impl Scene
 
                         // Get input node state
 
-                        let input_state = self.circuit.edges(input_node).any(|e| *e.weight() == ON);
+                        let input_state = self.get_neighbor_power(input_node);
 
                         // Compute output state
 
-                        data.powered = input_state;
+                        data.on = input_state;
                     }
                     Block::ANDGate(data) => {
                         // Get named nodes
@@ -135,8 +145,8 @@ impl Scene
 
                         // Get input node states
 
-                        let input_a_state = self.circuit.edges(input_a_node).any(|e| *e.weight() == ON);
-                        let input_b_state = self.circuit.edges(input_b_node).any(|e| *e.weight() == ON);
+                        let input_a_state = self.get_neighbor_power(input_a_node);
+                        let input_b_state = self.get_neighbor_power(input_b_node);
 
                         // Compute output state
 
@@ -149,8 +159,8 @@ impl Scene
 
                         // Get input node states
 
-                        let input_a_state = self.circuit.edges(input_a_node).any(|e| *e.weight() == ON);
-                        let input_b_state = self.circuit.edges(input_b_node).any(|e| *e.weight() == ON);
+                        let input_a_state = self.get_neighbor_power(input_a_node);
+                        let input_b_state = self.get_neighbor_power(input_b_node);
 
                         // Compute output state
 
@@ -163,7 +173,7 @@ impl Scene
 
                         // Get input node state
 
-                        let input_state = self.circuit.edges(input_node).any(|e| *e.weight() == ON);
+                        let input_state = self.get_neighbor_power(input_node);
 
                         // Compute output state
 
@@ -249,11 +259,16 @@ impl Scene
 
         // Compute new wire states
 
+        /*
         // Determine wire network state using the provided wire network and block states
         // Stored as an external lambda for better readability
         let compute_wire_network_state =
             |wire_network: &HashSet<(InstanceID, NodeID)>, blocks: &HashMap<InstanceID, (Coord, Orient, Block)>| -> PowerState {
                 for (_, node_id) in wire_network {
+                    if self.get_neighbor_power(*node_id) == ON {
+                        return ON;
+                    }
+                    /*
                     for neighbor_node_id in self.circuit.neighbors(*node_id) {
                         let (neighbor_id, _, _) = self.circuit.node_weight(neighbor_node_id).unwrap();
                         let neighbor_block = &blocks[neighbor_id].2;
@@ -261,59 +276,13 @@ impl Scene
                         if neighbor_block.get_power().unwrap() {
                             return ON;
                         }
-
-                        /*
-                        match neighbor_block {
-                            Block::Wire(_) => {
-                                // Signals are propagated by wire networks, not individual wires, so no actions are needed here
-                            }
-                            Block::Toggle(data) => {
-                                // Check if this toggle powers the network
-                                if data.powered {
-                                    return ON;
-                                }
-                            }
-                            Block::Pixel(_) => {
-                                // Not a source block
-                            }
-                            Block::ANDGate(data) => {
-                                // Check if this gate powers the network
-                                if data.powered {
-                                    return ON;
-                                }
-                            }
-                            Block::ORGate(data) => {
-                                // Check if this gate powers the network
-                                if data.powered {
-                                    return ON;
-                                }
-                            }
-                            Block::NOTGate(data) => {
-                                // Check if this gate powers the network
-                                if data.powered {
-                                    return ON;
-                                }
-                            }
-                            Block::Clock(data) => {
-                                // Check if this clock powers the network
-                                if data.powered {
-                                    return ON;
-                                }
-                            }
-                            Block::Pulse(data) => {
-                                // Check if this pulse powers the network
-                                if data.powered {
-                                    return ON;
-                                }
-                            }
-                            _ => panic!("not possible, encountered non-circuit or wire block")
-                        }
-                         */
                     }
+                     */
                 }
 
                 OFF
             };
+         */
 
         // Determine wire networks' state prior to this tick's updates
         // This can be done by referencing `self.*` since `self` has not been modified yet
@@ -331,7 +300,14 @@ impl Scene
         // Determine wire networks' state (prior to this tick's non-wire circuit block updates)
         let contiguous_wire_networks_updated_state = contiguous_wire_networks
             .iter()
-            .map(|e| compute_wire_network_state(e, &self.blocks))
+            .map(|wire_network| {
+                for (_, node_id) in wire_network {
+                    if self.get_neighbor_power(*node_id) == ON {
+                        return ON;
+                    }
+                }
+                OFF
+            })
             .collect::<Vec<PowerState>>();
 
         // Compute delta for all wire blocks of the scene together
@@ -370,7 +346,7 @@ impl Scene
             let (id_a, id_b) = (self.circuit.node_weight(node_a).unwrap().0, self.circuit.node_weight(node_b).unwrap().0);
             let (block_a, block_b) = (&self.blocks[&id_a].2, &self.blocks[&id_b].2);
 
-            if block_a.get_power().unwrap_or(OFF) || block_b.get_power().unwrap_or(OFF) {
+            if block_a.get_circuit_power().unwrap_or(OFF) == ON || block_b.get_circuit_power().unwrap_or(OFF) == ON {
                 self.circuit.update_edge(node_a, node_b, ON);
             } else {
                 self.circuit.update_edge(node_a, node_b, OFF);
@@ -467,12 +443,32 @@ impl Scene
 }
 
 #[test]
-pub fn wire_test()
+pub fn scene_test()
 {
     let mut scene = Scene::default();
 
-    assert!(scene.add_wire((0..10).map(|e| Coord::new(0, 0, e)).collect()).is_some());
-    assert!(scene.add_wire((0..10).map(|e| Coord::new(-5 + e, 1, 0)).collect()).is_some());
+    let _ = scene.add_wire((0..10).map(|e| Coord::new(0, 0, e)).collect()).unwrap();
+    let _ = scene.add_wire((0..10).map(|e| Coord::new(-5 + e, 1, 0)).collect()).unwrap();
+    let _toggle = scene.add_block(Block::Toggle(VoxelPowered {
+        powered: false,
+    }), Coord::new(0, 2, 0), Default::default()).unwrap();
+    let _clock = scene.add_block(Block::Clock(VoxelClock {
+        rate: 3,
+        start_tick: 2,
+        powered: false,
+    }), Coord::new(-2, 2, 0), Default::default()).unwrap();
 
-    scene.save_debug_circuit(&Path::new("./result.dot"));
+    scene.save_debug_circuit(&Path::new("./result-initial.dot"));
+
+    for i in 1..=20u32 {
+        let deltas = scene.simulate_tick();
+        dbg!(&deltas);
+
+        #[cfg(feature = "")]
+        if let Block::Toggle(b) = &mut scene.blocks.get_mut(&toggle).unwrap().2 {
+            b.powered = i % 2 == 0;
+        }
+
+        scene.save_debug_circuit(&Path::new(&format!("./result-tick-{}.dot", i)));
+    }
 }

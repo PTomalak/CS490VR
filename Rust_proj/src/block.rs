@@ -47,6 +47,12 @@ pub struct VoxelPowered
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct VoxelPixel
+{
+    pub on: bool,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelBlock
 {
     pub color: Color,
@@ -76,7 +82,7 @@ pub enum Block
     Wire(VoxelPowered),
     Block(VoxelBlock),
     Toggle(VoxelPowered),
-    Pixel(VoxelPowered),
+    Pixel(VoxelPixel),
     ANDGate(VoxelPowered),
     ORGate(VoxelPowered),
     NOTGate(VoxelPowered),
@@ -100,10 +106,23 @@ impl Default for Block
 
 impl Block
 {
-    /// Get this block's power state (if applicable)
-    pub fn get_power(&self) -> Option<bool> {
+    /// Get this block's power state (returns value only if applicable)
+    pub fn get_circuit_power(&self) -> Option<PowerState> {
         match self {
             Block::Wire(data) => Some(data.powered),
+            Block::Toggle(data) => Some(data.powered),
+            Block::ANDGate(data) => Some(data.powered),
+            Block::ORGate(data) => Some(data.powered),
+            Block::NOTGate(data) => Some(data.powered),
+            Block::Clock(data) => Some(data.powered),
+            Block::Pulse(data) => Some(data.powered),
+            _ => None
+        }
+    }
+
+    /// Get this block's power state (excludes wires, returns value only if applicable)
+    pub fn get_non_wire_power(&self) -> Option<PowerState> {
+        match self {
             Block::Toggle(data) => Some(data.powered),
             Block::ANDGate(data) => Some(data.powered),
             Block::ORGate(data) => Some(data.powered),
