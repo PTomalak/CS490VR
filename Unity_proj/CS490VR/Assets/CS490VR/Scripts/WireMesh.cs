@@ -62,7 +62,7 @@ public class WireMesh : MonoBehaviour
         // Array used for convenience of reversing faces
         bool[] reverseArray = new bool[6] { true, false, false, true, true, false };
 
-        foreach (int[] c in wm.wire_map.Keys)
+        foreach (Vector3Int c in wm.wire_map.Keys)
         {
             // Create faces
             for (int i = 0; i < 6; i++)
@@ -70,7 +70,7 @@ public class WireMesh : MonoBehaviour
                 int[] dir = directions[i];
 
                 // Pre-calculate relevant variables to be used for both connection faces and cap faces
-                Vector3 basePos = new Vector3(c[0], c[1], c[2]);     // Position of the center of the block
+                Vector3 basePos = new Vector3(c.x, c.y, c.z);     // Position of the center of the block
                 int axis = i / 2;                           // 0 = x, 1 = y, 2 = z
                 int magnitude = (i % 2 == 0) ? 1 : -1;      // Sign of the direction's axis
                 float co = WIRE_SIZE / 2;                   // Distance between center and edge of cube
@@ -78,14 +78,14 @@ public class WireMesh : MonoBehaviour
                 bool powered = wm.wire_map[c].powered;
 
                 // Either create a single square (no connection) or a long rectangular prism (wire connection)
-                if (HasConnection(c[0], c[1], c[2], dir[0], dir[1], dir[2]))
+                if (HasConnection(c.x, c.y, c.z, dir[0], dir[1], dir[2]))
                 {
                     // Skip double-creating the mesh for pairs of connected wires (continue for non-wire connections)
                     // Those with lower X/Y/Z coords are prioritized
-                    if (wm.wire_map.ContainsKey(new int[3] { c[0] + dir[0], c[1] + dir[1], c[2] + dir[2] }) && i % 2 == 0) continue;
+                    if (wm.wire_map.ContainsKey(new Vector3Int( c.x + dir[0], c.y + dir[1], c.z + dir[2] )) && i % 2 == 0) continue;
 
                     // Calculate other position for convenience
-                    Vector3 otherPos = new Vector3(c[0] + dir[0], c[1] + dir[1], c[2] + dir[2]);
+                    Vector3 otherPos = new Vector3(c.x + dir[0], c.y + dir[1], c.z + dir[2]);
 
                     // Calcuate pool of vertices (which will be drawn from multiple times to make connection faces)
                     List<Vector3> corners = axis switch
@@ -316,7 +316,7 @@ public class WireMesh : MonoBehaviour
         //if (z + dz < 0 || z + dz > data.size.z - 1) return false;
         //return data.wires[x + dx, y + dy, z + dz] || data.connections[x + dx, y + dy, z + dz];
 
-        int[] coords = new int[3] { x + dx, y + dy, z + dz };
-        return (wm.wire_map.ContainsKey(coords) || (wm.connections.Find((c) => c[0] == coords[0] && c[1] == coords[1] && c[2] == coords[2]) != null));
+        Vector3Int coords = new Vector3Int(x + dx, y + dy, z + dz);
+        return (wm.wire_map.ContainsKey(coords) || wm.connections.Contains(coords));
     }
 }

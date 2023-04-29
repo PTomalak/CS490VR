@@ -17,21 +17,11 @@ public class JSONParser : MonoBehaviour
     {
         public string action;
     }
-    public class PlaceAction : Action
+    public class PlaceUpdateAction : Action
     {
-        public PlaceData[] data;
+        public object[] data;
 
-        public PlaceAction(string action, PlaceData[] data)
-        {
-            this.action = action;
-            this.data = data;
-        }
-    }
-    public class UpdateAction : Action
-    {
-        public UpdateData[] data;
-
-        public UpdateAction(string action, UpdateData[] data)
+        public PlaceUpdateAction(string action, object[] data)
         {
             this.action = action;
             this.data = data;
@@ -41,25 +31,24 @@ public class JSONParser : MonoBehaviour
     {
         public RemoveData[] data;
 
-        public RemoveAction(string action, RemoveData[] data)
+        public RemoveAction(RemoveData[] data)
         {
-            this.action = action;
+            this.action = "remove";
+            this.data = data;
+        }
+    }
+    public class PlayersAction : Action
+    {
+        public PlayerManager.PlayerData[] data;
+
+        public PlayersAction(PlayerManager.PlayerData[] data)
+        {
+            this.action = "players";
             this.data = data;
         }
     }
 
     // Classes for serializing data for certain types of actions
-    public class PlaceData
-    {
-        public string block;
-        public object data;
-
-        public PlaceData(string v, BlockData d)
-        {
-            block = v;
-            data = d;
-        }
-    }
     public class RemoveData
     {
         public int id;
@@ -114,24 +103,8 @@ public class JSONParser : MonoBehaviour
         int ops = 0;
         while (incomingActions.Count > 0 && ops < 50)
         {
-            HandleMessage(incomingActions.Dequeue());
+            PerformAction(incomingActions.Dequeue());
             ops += 1;
-        }
-    }
-
-
-    // Determine which type of request a given JSON is and perform the appropriate action with it
-    public void HandleMessage(string json)
-    {
-        PlayerManager.PlayerData[] p_data = new PlayerManager.PlayerData[0] { };
-        JsonConvert.PopulateObject(json, p_data);
-
-        if (p_data.Length > 0)
-        {
-            pm.UpdatePlayerList(p_data);
-        } else
-        {
-            PerformAction(json);
         }
     }
 
@@ -151,8 +124,8 @@ public class JSONParser : MonoBehaviour
         {
             case "place":
                 {
-                    PlaceAction act = JsonConvert.DeserializeObject<PlaceAction>(json);
-                    foreach (PlaceData data in act.data)
+                    PlaceUpdateAction act = JsonConvert.DeserializeObject<PlaceUpdateAction>(json);
+                    foreach (object data in act.data)
                     {
                         BMResponse resp = bm.PlaceBlock(data);
                         tc.SendJson(JsonUtility.ToJson(resp));
@@ -171,14 +144,20 @@ public class JSONParser : MonoBehaviour
                 break;
             case "update":
                 {
-                    UpdateAction act = JsonConvert.DeserializeObject<UpdateAction>(json);
-                    foreach (UpdateData data in act.data)
+                    PlaceUpdateAction act = JsonConvert.DeserializeObject<PlaceUpdateAction>(json);
+                    foreach (object data in act.data)
                     {
                         BMResponse resp = bm.UpdateBlock(data);
                         tc.SendJson(JsonUtility.ToJson(resp));
                     }
                 }
                 break;
+            case "players":
+                {
+                    PlayersAction act = JsonConvert.DeserializeObject<PlayersAction>(json);
+                    pm.UpdatePlayerList(act.data);
+                    break;
+                }
             default:
                 BMResponse res = new BMResponse(false, "Invalid Action");
                 tc.SendJson(JsonUtility.ToJson(res));
@@ -186,16 +165,25 @@ public class JSONParser : MonoBehaviour
         }
     }
 
-    // Convert local request into JSON and send request
-    public void SendPlaceRequest(PlaceData data)
+    public void SendRequest(string req, object data)
     {
-        SendPlaceRequest(new PlaceData[1] { data });
+        SendRequest(req, new object[1] { data });
     }
-    public void SendPlaceRequest(PlaceData[] data)
+    public void SendRequest(string req, object[] data)
     {
         if (!tc) return;
-        tc.SendJson(JsonConvert.SerializeObject(new PlaceAction("place", data)));
+        switch (req)
+        {
+            case "place":
+                tc.SendJson(JsonConvert.SerializeObject(new PlaceUpdateAction("place",data)));
+                break;
+            case "update":
+                tc.SendJson(JsonConvert.SerializeObject(new PlaceUpdateAction("update",data)));
+                break;
+        }
     }
+
+    // Convert local request into JSON and send request
     public void SendRemoveRequest(RemoveData data)
     {
         SendRemoveRequest(new RemoveData[1] { data });
@@ -203,15 +191,6 @@ public class JSONParser : MonoBehaviour
     public void SendRemoveRequest(RemoveData[] data)
     {
         if (!tc) return;
-        tc.SendJson(JsonConvert.SerializeObject(new RemoveAction("remove", data)));
-    }
-    public void SendUpdateRequest(UpdateData data)
-    {
-        SendUpdateRequest(new UpdateData[1] { data });
-    }
-    public void SendUpdateRequest(UpdateData[] data)
-    {
-        if (!tc) return;
-        tc.SendJson(JsonConvert.SerializeObject(new UpdateAction("update", data)));
+        tc.SendJson(JsonConvert.SerializeObject(new RemoveAction(data)));
     }
 }

@@ -24,11 +24,11 @@ public class BlockManager : MonoBehaviour
     ///// FROM SERVER FUNCTIONS /////
     #region server
     // Places a block into the world
-    public BMResponse PlaceBlock(PlaceData placeData)
+    public BMResponse PlaceBlock(object data)
     {
         string message = "ok";
 
-        string blockJson = JsonConvert.SerializeObject(placeData.data);
+        string blockJson = JsonConvert.SerializeObject(data);
         BlockData basicData = JsonConvert.DeserializeObject<BlockData>(blockJson);
 
         // Check if our dictionary already contains the block (or wire)
@@ -41,7 +41,7 @@ public class BlockManager : MonoBehaviour
         }
 
         // Place wires using the WireManager
-        if (placeData.block == "wire")
+        if (basicData.block == "wire")
         {
             PowerableData wire_data = JsonConvert.DeserializeObject<PowerableData>(blockJson);
             bool res = wm.PlaceWire(wire_data);
@@ -49,7 +49,7 @@ public class BlockManager : MonoBehaviour
         }
 
         // Instantiate this voxel if we have a prefab for it
-        BlockDictionary.BlockDictionaryObject e = block_dict.LIST.Find((v) => v.block == placeData.block);
+        BlockDictionary.BlockDictionaryObject e = block_dict.LIST.Find((v) => v.block == basicData.block);
         if (block_dict.LIST.Contains(e))
         {
             // Spawn the object in the world and make its name readable in the editor
@@ -73,7 +73,7 @@ public class BlockManager : MonoBehaviour
             blocks.Add(id, newObject);
         } else
         {
-            return new BMResponse(false, "No Prefab for: "+placeData.block);
+            return new BMResponse(false, "No Prefab for: "+basicData.block);
         }
 
         return new BMResponse(true, message);
@@ -109,32 +109,35 @@ public class BlockManager : MonoBehaviour
     }
 
     // Updates the data of a block
-    public BMResponse UpdateBlock(UpdateData updateData)
+    public BMResponse UpdateBlock(object data)
     {
-        string blockJson = JsonConvert.SerializeObject(updateData.data);
+        string blockJson = JsonConvert.SerializeObject(data);
+        BlockData basicData = JsonConvert.DeserializeObject<BlockData>(blockJson);
 
         // See if we are updating a wire and intercept the update
-        if (wm.wire_ids.ContainsKey(updateData.id))
+        if (wm.wire_ids.ContainsKey(basicData.id))
         {
             // Obtain our existing data
-            WireManager.WireData existing_data = wm.wire_map[wm.wire_ids[updateData.id]];
+            WireManager.WireData existing_data = wm.wire_map[wm.wire_ids[basicData.id]];
             PowerableData wire_data = new PowerableData();
             wire_data.id = existing_data.id;
-            wire_data.position = wm.wire_ids[updateData.id];
+            wire_data.position = wm.wire_ids[basicData.id];
             wire_data.powered = existing_data.powered;
+            wire_data.block = "wire";
 
             // Obtain modified version of existing data and update wires
             JsonConvert.PopulateObject(blockJson, wire_data);
-            bool res = wm.UpdateWire(updateData.id, wire_data);
+            bool res = wm.UpdateWire(basicData.id, wire_data);
             return new BMResponse(res, (res) ? "ok (wire)" : "Wire Manager couldn't update wire");
         }
 
         // Check if we have that block in our system
-        GameObject target = blocks[updateData.id];
+        GameObject target = blocks[basicData.id];
         if (!target) return new BMResponse(false, "Block Not Found");
 
-        // Update block loader
+        // Unload and reload the block loader
         IDataLoader bl = target.GetComponent<IDataLoader>();
+        bl.Unload();
         if (bl == null) return new BMResponse(false, "Block had no Data Loader");
         JsonConvert.PopulateObject(blockJson, bl.GetData());
         bl.Load();
@@ -155,15 +158,15 @@ public class BlockManager : MonoBehaviour
         {
             // Construct wire data
             PowerableData wire_data = new PowerableData();
-            wire_data.position = new int[] { x, y, z };
+            wire_data.block = "wire";
             wire_data.id = 0;
             wire_data.id = x * 100 + y * 10 + z;
+            wire_data.position = new Vector3Int(x, y, z);
             wire_data.powered = false;
 
             // Prepare and send request
-            PlaceData wirePlaceData = new PlaceData(block, wire_data);
             if (!jp) return new BMResponse(false, "No JSONParser");
-            jp.SendPlaceRequest(wirePlaceData);
+            jp.SendRequest("place", wire_data);
 
             return new BMResponse(true, "ok");
         }
@@ -183,15 +186,15 @@ public class BlockManager : MonoBehaviour
         // Obtaine block's default data to pass to server
         BlockData data = d.GetDefaultState();
 
-        // Change position to the requested position and set ID to zero
+        // Set position and block type, and zero the ID
+        data.block = block;
         data.id = 0;
         data.id = x * 100 + y * 10 + z;
-        data.position = new int[3] { x, y, z };
+        data.position = new Vector3Int(x, y, z);
 
         // Prepare and send request
-        PlaceData placeData = new PlaceData(block, data);
         if (!jp) return new BMResponse(false, "No JSONParser");
-        jp.SendPlaceRequest(placeData);
+        jp.SendRequest("place", data);
 
         return new BMResponse(true, "ok");
     }
@@ -223,7 +226,7 @@ public class BlockManager : MonoBehaviour
     {
         Vector3 lpos = transform.InverseTransformPoint(x, y, z);
         Vector3Int p = Vector3Int.RoundToInt(lpos);
-        int[] pos = new int[3] { p.x, p.y, p.z };
+        Vector3Int pos = new Vector3Int(p.x, p.y, p.z);
 
         if (wm.wire_map.ContainsKey(pos))
         {
@@ -232,14 +235,46 @@ public class BlockManager : MonoBehaviour
         return 0;
     }
 
-    public BMResponse ClientUpdateBlock(int id, string block, object data)
+    public BMResponse ClientUpdateBlock(int id, object data)
     {
         // Unnecessary check here (server can just do it), but this helps reduce client-server communication
         if (!blocks.ContainsKey(id) && !wm.wire_ids.ContainsKey(id)) return new BMResponse(false, "Block Not Found");
 
-        UpdateData requestData = new UpdateData(id, block, data);
-        if (!jp) return new BMResponse(false, "No JSONParser");
-        jp.SendUpdateRequest(requestData);
+        if (wm.wire_ids.ContainsKey(id))
+        {
+            // Build and populate a PowerableData for wires
+            WireManager.WireData target = wm.wire_map[wm.wire_ids[id]];
+            if (target == null) return new BMResponse(false, "Wire Not Found");
+
+            PowerableData pd = new PowerableData();
+            pd.block = "wire";
+            pd.id = target.id;
+            pd.position = wm.wire_ids[id];
+            pd.powered = target.powered;
+
+            if (pd == null) return new BMResponse(false, "Block had no Data");
+            JsonConvert.PopulateObject(JsonConvert.SerializeObject(data), pd);
+
+            if (!jp) return new BMResponse(false, "No JSONParser");
+            jp.SendRequest("update", pd);
+
+        } else
+        {
+            // Obtain data loader via typical means
+            GameObject target = blocks[id];
+            if (!target) return new BMResponse(false, "Block Not Found");
+            IDataLoader dl = target.GetComponent<IDataLoader>();
+            if (dl == null) return new BMResponse(false, "Block had no Data Loader");
+
+            // Populate actual data (pretty bad way to do it, I know) then restore its previous state without loading any changes
+            if (!jp) return new BMResponse(false, "No JSONParser");
+            string saved_data = JsonConvert.SerializeObject(dl.GetData());
+            JsonConvert.PopulateObject(JsonConvert.SerializeObject(data), dl.GetData());
+            jp.SendRequest("update", dl.GetData());
+            JsonConvert.PopulateObject(saved_data, dl.GetData());
+        }
+
+        
 
         return new BMResponse(true, "ok");
     }
@@ -264,45 +299,35 @@ public class BlockManager : MonoBehaviour
         if (wm.hasChanged)
         {
             wm.ReloadMesh();
+            wm.hasChanged = false;
         }
     }
 
     // Block test waits a few seconds for the server to activate, then places/edits several blocks
     IEnumerator BlockTest()
     {
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(2f);
 
+        // Place several blocks
         ClientPlaceBlock("wire", 0, 2, 0);
-        yield return new WaitForFixedUpdate();
-
         ClientPlaceBlock("wire", 1, 2, 1);
-        yield return new WaitForFixedUpdate();
-
         ClientPlaceBlock("wire", 2, 2, 0);
-        yield return new WaitForFixedUpdate();
-
         ClientPlaceBlock("wire", 1, 2, 0);
-        yield return new WaitForFixedUpdate();
-
         ClientPlaceBlock("wire", 1, 2, 2);
-        yield return new WaitForFixedUpdate();
-
-        ClientRemoveBlock(030);
-        yield return new WaitForFixedUpdate();
-
+        ClientPlaceBlock("block", 0, 3, 0);
         ClientPlaceBlock("toggle", 0, 4, 0);
-        yield return new WaitForFixedUpdate();
-
         ClientPlaceBlock("wire", 1, 4, 0);
-        yield return new WaitForFixedUpdate();
 
-        ClientUpdateBlock(140, "wire", new { powered = true });
-        yield return new WaitForFixedUpdate();
+        // Allow time for the client to remove a block
+        yield return new WaitForSeconds(0.05f);
+        ClientRemoveBlock(030);
 
+        yield return new WaitForSeconds(0.05f);
+        ClientUpdateBlock(140, new { powered = true });
         ClientPlaceBlock("and_gate", 1, 1, 1);
-        yield return new WaitForFixedUpdate();
-
         ClientPlaceBlock("not_gate", 0, 3, 0);
-        yield return new WaitForFixedUpdate();
+
+        yield return new WaitForSeconds(0.05f);
+        ClientUpdateBlock(111, new { rotation = RotatableData.BlockRotation.LEFT });
     }
 }

@@ -15,23 +15,11 @@ public class WireManager : MonoBehaviour
 
     // List of wire IDs
     //public List<int> wire_ids = new List<int>();
-    public Dictionary<int, int[]> wire_ids = new Dictionary<int, int[]>();
+    public Dictionary<int, Vector3Int> wire_ids = new Dictionary<int, Vector3Int>();
 
     // 3D Wire map (maps [x,y,z] to {id, powered})
     [HideInInspector]
-    public Dictionary<int[], WireData> wire_map = new Dictionary<int[], WireData>(new WireCompare());
-    public class WireCompare : IEqualityComparer<int[]>
-    {
-        bool IEqualityComparer<int[]>.Equals(int[] x, int[] y)
-        {
-            return x[0] == y[0] && x[1] == y[1] && x[2] == y[2];
-        }
-
-        int IEqualityComparer<int[]>.GetHashCode(int[] obj)
-        {
-            return new Vector3Int(obj[0], obj[1], obj[2]).GetHashCode();
-        }
-    }
+    public Dictionary<Vector3Int, WireData> wire_map = new Dictionary<Vector3Int, WireData>();
     public class WireData
     {
         public int id;
@@ -46,14 +34,14 @@ public class WireManager : MonoBehaviour
 
     // Connection locations (areas that adjacent wires should connect to)
     [HideInInspector]
-    public List<int[]> connections = new List<int[]>();
+    public List<Vector3Int> connections = new List<Vector3Int>();
 
     // Adds a wire to the grid
     public bool AddWire(int x, int y, int z, int id, bool powered)
     {
         if (wire_ids.ContainsKey(id)) return false;
 
-        int[] coords = new int[3] { x, y, z };
+        Vector3Int coords = new Vector3Int(x, y, z);
         if (wire_map.ContainsKey(coords)) return false;
 
         wire_ids.Add(id, coords);
@@ -64,8 +52,8 @@ public class WireManager : MonoBehaviour
 
     public bool PlaceWire(PowerableData data)
     {
-        int[] p = data.position;
-        return AddWire(p[0], p[1], p[2], data.id, data.powered);
+        Vector3Int p = data.position;
+        return AddWire(p.x, p.y, p.z, data.id, data.powered);
     }
 
     public bool UpdateWire(int id, PowerableData data)
@@ -73,20 +61,11 @@ public class WireManager : MonoBehaviour
         if (!wire_ids.ContainsKey(id)) return false;
 
         // Determine if we need to move the wire (new position != old position)
-        int[] coords = wire_ids[id];
-        bool eq = true;
-        for (int i = 0; i < coords.Length; i++)
-        {
-            if (coords[i] != data.position[i])
-            {
-                eq = false;
-                break;
-            }
-        }
+        Vector3Int coords = wire_ids[id];
 
         if (!wire_map.ContainsKey(coords)) return false;
 
-        if (eq)
+        if (coords == data.position)
         {
             wire_map[coords].powered = data.powered;
         } else
@@ -103,7 +82,7 @@ public class WireManager : MonoBehaviour
     public bool RemoveWire(int id)
     {
         if (!wire_ids.ContainsKey(id)) return false;
-        int[] coords = wire_ids[id];
+        Vector3Int coords = wire_ids[id];
         wire_ids.Remove(id);
         wire_map.Remove(coords);
 
@@ -111,13 +90,13 @@ public class WireManager : MonoBehaviour
         return true;
     }
 
-    public void AddConnection(int[] c)
+    public void AddConnection(Vector3Int c)
     {
         connections.Add(c);
         hasChanged = true;
     }
 
-    public void RemoveConnection(int[] c)
+    public void RemoveConnection(Vector3Int c)
     {
         connections.Remove(c);
         hasChanged = true;

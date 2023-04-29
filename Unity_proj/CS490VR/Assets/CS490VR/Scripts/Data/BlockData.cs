@@ -8,17 +8,20 @@ public class BlockData
 {
     // Data values shared by all blocks
 
-    // ID
+    // Block (type of block that this block is
+    public string block = "";
+
+    // ID (UUID of this exact block instance)
     public int id = 0;
 
     // Location (multivoxels can interpret this value as they choose, usually the center)
-    public int[] position = new int[3];
+    public Vector3Int position = new Vector3Int();
 
 
     /// METHODS TO OVERRIDE ///
     public virtual void UpdateObject(GameObject gameObject)
     {
-        gameObject.transform.localPosition = new Vector3Int(position[0], position[1], position[2]);
+        gameObject.transform.localPosition = position;
     }
 
     public virtual BlockData GetDefaultState()

@@ -11,10 +11,10 @@ public class PlayerManager : MonoBehaviour
     #endregion
 
     // Data to track player position/rotation
-    public int myId;
+    public string myName = "";
     public Vector3 myPosition;
     public Vector3 myRotation;
-    public Dictionary<int, GameObject> playerList;
+    public Dictionary<string, GameObject> playerList;
 
     // Data to handle sending the position/rotation updates
     float SEND_FREQUENCY = 0.05f;
@@ -22,39 +22,39 @@ public class PlayerManager : MonoBehaviour
 
     public class PlayerData
     {
-        public int id;
+        public string name;
         public Vector3 position;
-        public Vector3 rotation;
+        public Vector3 direction;
 
-        public PlayerData(int id, Vector3 pos, Vector3 rot)
+        public PlayerData(string name, Vector3 pos, Vector3 rot)
         {
-            this.id = id;
+            this.name = name;
             this.position = pos;
-            this.rotation = rot;
+            this.direction = rot;
         }
     }
 
     public void UpdatePlayerList(PlayerData[] data)
     {
         // Set up unused ids to remove nonexistent players
-        List<int> unusedIds = new List<int>();
-        foreach (int id in playerList.Keys)
+        List<string> unusedIds = new List<string>();
+        foreach (string name in playerList.Keys)
         {
-            unusedIds.Add(id);
+            unusedIds.Add(name);
         }
 
         // Place or move every player
         foreach (PlayerData d in data)
         {
-            if (d.id == myId) continue;
-            unusedIds.Remove(d.id);
-            Quaternion rot = Quaternion.Euler(d.rotation);
+            if (d.name == myName) continue;
+            unusedIds.Remove(d.name);
+            Quaternion rot = Quaternion.Euler(d.direction);
 
-            if (playerList.ContainsKey(d.id))
+            if (playerList.ContainsKey(d.name))
             {
                 // Move the object to the correct point
-                playerList[d.id].transform.localPosition = d.position;
-                playerList[d.id].transform.localRotation = rot;
+                playerList[d.name].transform.localPosition = d.position;
+                playerList[d.name].transform.localRotation = rot;
             }
             else
             {
@@ -63,15 +63,15 @@ public class PlayerManager : MonoBehaviour
                 newPlayer.transform.localPosition = d.position;
                 newPlayer.transform.localRotation = rot;
 
-                playerList.Add(d.id, newPlayer);
+                playerList.Add(d.name, newPlayer);
             }
         }
 
         // Remove objects associated with unused ids
-        foreach (int id in unusedIds)
+        foreach (string name in unusedIds)
         {
-            if (!playerList.ContainsKey(id)) continue;
-            Destroy(playerList[id]);
+            if (!playerList.ContainsKey(name)) continue;
+            Destroy(playerList[name]);
         }
     }
 
@@ -79,6 +79,14 @@ public class PlayerManager : MonoBehaviour
     {
         myPosition = pos;
         myRotation = rot;
+    }
+
+    public void InitializePlayer(string name, Vector3 pos, Vector3 rot)
+    {
+        myName = name;
+        myPosition = pos;
+        myRotation = rot;
+        tc.SendJson(JsonConvert.SerializeObject(new PlayerData(myName, myPosition, myRotation)));
     }
 
     private void Awake()
@@ -89,9 +97,9 @@ public class PlayerManager : MonoBehaviour
     // Periodically send updates with our position and rotation
     private void FixedUpdate()
     {
-        if (prev_send_time+SEND_FREQUENCY < Time.time)
+        if (myName != "" && prev_send_time+SEND_FREQUENCY < Time.time)
         {
-            tc.SendJson(JsonConvert.SerializeObject(new PlayerData(myId, myPosition, myRotation)));
+            tc.SendJson(JsonConvert.SerializeObject(new PlayerData(myName, myPosition, myRotation)));
             prev_send_time = Time.time;
         }
     }

@@ -31,14 +31,13 @@ public class DiodeLoader : RotatableLoader
         Vector3Int da = pos + Vector3Int.RoundToInt(rot * a);
 
         if (!bm) bm = GetComponentInParent<BlockManager>();
-        int[] target = new int[3] { da.x, da.y, da.z };
         if (add)
         {
-            bm.wm.AddConnection(target);
+            bm.wm.AddConnection(da);
         }
         else
         {
-            bm.wm.RemoveConnection(target);
+            bm.wm.RemoveConnection(da);
         }
     }
 }
