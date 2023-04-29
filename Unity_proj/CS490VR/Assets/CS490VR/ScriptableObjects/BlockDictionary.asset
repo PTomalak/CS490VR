@@ -32,17 +32,17 @@ MonoBehaviour:
     prefab: {fileID: 1729732562956071229, guid: fad76894c91954347bf7c0d80cff316c,
       type: 3}
     icon: {fileID: 2800000, guid: 6c1ddf45ff49ec6468b5f4dc0637b862, type: 3}
-    enabled: 0
+    enabled: 1
   - block: pulse
     prefab: {fileID: 3633732729333439380, guid: 86c88f02dc8deae4093376e2dfd8121c,
       type: 3}
     icon: {fileID: 2800000, guid: 0b583effd5a648a47931e7a6fd21ccc4, type: 3}
-    enabled: 0
+    enabled: 1
   - block: diode
     prefab: {fileID: 5896725064193185941, guid: 51cfab407a6452c48900df466b684cef,
       type: 3}
     icon: {fileID: 2800000, guid: 88bf4359bdf2860449947813c359a1e5, type: 3}
-    enabled: 1
+    enabled: 0
   - block: not_gate
     prefab: {fileID: 734931266230115913, guid: c254984c479d90e438b45c7835111eec, type: 3}
     icon: {fileID: 2800000, guid: c4025cf74f744414f92e5f87de38c500, type: 3}
@@ -61,7 +61,7 @@ MonoBehaviour:
     prefab: {fileID: 1000686929664426853, guid: 907df31ed2bd8c84e98204d2455d4d04,
       type: 3}
     icon: {fileID: 2800000, guid: ea2ef8d658470cf4babc30d66d54086a, type: 3}
-    enabled: 0
+    enabled: 1
   - block: nor_gate
     prefab: {fileID: 6001251101387403167, guid: 1b09e80d6c68b7f4e9f918a0951553bd,
       type: 3}

@@ -1,4 +1,5 @@
 import socket
+import json
 
 def server_program():
     # get the hostname
@@ -19,9 +20,19 @@ def server_program():
         if not data:
             # if data is not received break
             break
-        print(str(data))
-        # data = input(' -> ')
-        conn.send(data.encode())  # send data to the client
+
+        # Ignore BM responses
+        for d in (str(data)).split("\0"):
+            if (len(d) == 0):
+                continue
+            print(d)
+            js = json.loads(d)
+            if ('ok' in js):
+                continue
+
+            # Mirror other data
+            # data = input(' -> ')
+            conn.send(d.encode())  # send data to the client
 
     conn.close()  # close the connection
 
