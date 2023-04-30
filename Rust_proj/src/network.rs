@@ -6,7 +6,7 @@ use std::sync::{Arc, mpsc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant, UNIX_EPOCH};
 
-use cgmath::Vector3;
+use cgmath::{Vector3, Zero};
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 
@@ -21,7 +21,7 @@ pub type MessagePlainReceiver = mpsc::Receiver<Message>;
 pub type _MessageSender = Arc<Mutex<MessagePlainSender>>;
 pub type MessageReceiver = Arc<Mutex<MessagePlainReceiver>>;
 pub type World = Arc<Mutex<Scene>>;
-pub type Clients = Arc<Mutex<HashMap<ClientID, MessagePlainSender>>>;
+pub type Clients = Arc<Mutex<HashMap<ClientID, (Option<Client>, MessagePlainSender)>>>;
 
 pub const SERVER_ID: &str = "";
 pub const SERVER_DIRECTORY: &str = "./generated/";
@@ -108,7 +108,8 @@ pub enum Protocol
     BothRequestUpdateBlocks(Vec<ProtocolUpdateBlock>),
     BothRequestRemoveBlocks(Vec<ProtocolRemoveBlock>),
 
-    ClientRequestJoin(Client),
+    // Only expects 1 client, but stored as vector for consistency
+    ClientRequestJoin(Vec<Client>),
     ClientRequestLeave,
 
     ServerRequestKick,
@@ -144,96 +145,253 @@ impl Network
         let mut last_save = Instant::now();
         let mut last_tick = Instant::now();
 
-        // Process global message queue (from all clients)
-        for message in queue.lock().unwrap().iter() {
-            let client_id = message.0;
+        info!("running main server loop");
 
+        // Server run loop
+        loop {
             // Check if a save needs to be performed
             if last_save.elapsed() >= settings.autosave_duration {
+                info!("saving world...");
                 w.save(&settings.save_path);
+                info!("successfully saved world to \"{}\" (next save in {}s)", settings.save_path.to_str().unwrap(), settings.autosave_duration.as_secs_f32());
                 last_save = Instant::now();
             }
 
-            // Check if a tick needs to be simulated
+            // Check if a tick needs to be simulated (and associated tasks)
             if last_tick.elapsed() >= settings.tick_duration {
-                let _updates = w.simulate_tick();
+                let now = Instant::now();
+                let updates = w.simulate_tick();
                 last_tick = Instant::now();
+                info!("simulated tick in ~{}ms (versus {}ms maximum)", now.elapsed().as_millis(), settings.tick_duration.as_millis());
 
-                // TODO: Send updates to clients
+                // Send client data to all clients
+                let response = (SERVER_ID.to_string(), Protocol::ServerResponseMetadata(ProtocolResponseMetadata {
+                    ticks: w.get_ticks(),
+                    clients: clients
+                        .lock()
+                        .ok()?
+                        .iter()
+                        .map(|(id, (c, _))| c.clone().unwrap_or(Client {
+                            name: id.to_string(),
+                            position: Vector3::zero(),
+                            direction: Vector3::zero(),
+                        }))
+                        .collect(),
+                }));
+                for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
+                    drop(sv_to_cl_sender.1.send(response.clone()));
+                }
+
+                // Send block updates to all clients
+                let deltas = updates.iter().map(|e| ProtocolUpdateBlock {
+                    id: *e,
+                    position: None,
+                    rotation: None,
+                    data: Some(w.get_block(*e).unwrap().2),
+                }).collect();
+                let response = (SERVER_ID.to_string(), Protocol::BothRequestUpdateBlocks(deltas));
+                for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
+                    drop(sv_to_cl_sender.1.send(response.clone()));
+                }
             }
 
-            // Process message
-            match message.1 {
-                Protocol::BothNothing => {
-                    // Do nothing
-                    debug!("received nothing from client {}", client_id);
-                }
-                Protocol::BothResponse(data) => {
-                    if !data.ok {
-                        warn!("request to client {} failed with \"{}\"", client_id, data.message);
-                    }
-                }
-                Protocol::BothRequestPlaceBlocks(data) => {
-                    let mut result = Vec::new();
+            // Process global message queue (from all clients)
+            if let Some(message) = queue.lock().unwrap().try_recv().ok() { // for message in queue.lock().unwrap().iter() {
+                let client_id = message.0;
 
-                    // Process blocks
-                    for i in data {
-                        if i.id.is_some() {
-                            clients.lock().ok()?[&client_id].send((SERVER_ID.to_string(), Protocol::BothResponse(
-                                ProtocolResponse {
-                                    ok: false,
-                                    message: "did not expect instance ID".to_string(),
-                                }))).ok()?;
-                        } else {
-                            if let Some(instanceid) = w.add_block(i.data.clone(), i.position, i.rotation) {
-                                result.push(ProtocolPlaceBlock {
-                                    id: Some(instanceid),
-                                    position: i.position,
-                                    rotation: i.rotation,
-                                    data: i.data.clone(),
-                                });
+                // Process message
+                match message.1 {
+                    Protocol::BothNothing => {
+                        // Do nothing
+                        debug!("received nothing from client {}", client_id);
+                    }
+                    Protocol::BothResponse(data) => {
+                        if !data.ok {
+                            warn!("request to client {} failed with \"{}\"", client_id, data.message);
+                        }
+                    }
+                    Protocol::BothRequestPlaceBlocks(data) => {
+                        let mut result = Vec::new();
+
+                        // Process blocks
+                        for i in &data {
+                            if i.id.is_some() {
+                                clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
+                                    ProtocolResponse {
+                                        ok: false,
+                                        message: "did not expect instance ID".to_string(),
+                                    }))).ok()?;
+                                break;
                             } else {
+                                if let Some(instanceid) = w.add_block(i.data.clone(), i.position, i.rotation) {
+                                    result.push(ProtocolPlaceBlock {
+                                        id: Some(instanceid),
+                                        position: i.position,
+                                        rotation: i.rotation,
+                                        data: i.data.clone(),
+                                    });
+                                } else {
+                                    // Send error message to client
+                                    clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
+                                        ProtocolResponse {
+                                            ok: false,
+                                            message: "block overlaps existing block".to_string(),
+                                        }))).ok()?;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Check for success
+                        if result.len() != data.len() {
+                            continue;
+                        }
+
+                        // Send success message to client
+                        clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
+                            ProtocolResponse {
+                                ok: true,
+                                message: "".to_string(),
+                            }))).ok()?;
+
+                        // Send data to all clients
+                        let response = (SERVER_ID.to_string(), Protocol::BothRequestPlaceBlocks(result));
+                        for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
+                            drop(sv_to_cl_sender.1.send(response.clone()));
+                        }
+                    }
+                    Protocol::BothRequestUpdateBlocks(data) => {
+                        let mut result = Vec::new();
+
+                        // Process blocks
+                        for i in &data {
+                            let update_result = if i.position.is_some() || i.rotation.is_some() {
+                                w.get_block(i.id)
+                                    .map(|(coord, orient, block)| {
+                                        w.replace_block(i.id,
+                                                        i.data.clone().unwrap_or(block),
+                                                        i.position.unwrap_or(coord),
+                                                        i.rotation.unwrap_or(orient))
+                                            .unwrap()
+                                    })
+                            } else if let Some(d) = i.data.clone() {
+                                w.update_block(i.id, d)
+                                    .map(|_| ())
+                            } else {
+                                None
+                            };
+
+                            if update_result.is_none() {
                                 // Send error message to client
-                                clients.lock().ok()?[&client_id].send((SERVER_ID.to_string(), Protocol::BothResponse(
+                                clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
                                     ProtocolResponse {
                                         ok: false,
                                         message: "block overlaps existing block".to_string(),
                                     }))).ok()?;
+                                break;
                             }
+
+                            result.push(i.clone());
+                        }
+
+                        // Check for success
+                        if result.len() != data.len() {
+                            continue;
+                        }
+
+                        // Send success message to client
+                        clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
+                            ProtocolResponse {
+                                ok: true,
+                                message: "".to_string(),
+                            }))).ok()?;
+
+                        // Send data to all clients
+                        let response = (SERVER_ID.to_string(), Protocol::BothRequestUpdateBlocks(result));
+                        for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
+                            drop(sv_to_cl_sender.1.send(response.clone()));
                         }
                     }
+                    Protocol::BothRequestRemoveBlocks(data) => {
+                        let mut result = Vec::new();
 
-                    // Send block update to all clients
-                    let response = (SERVER_ID.to_string(), Protocol::BothRequestPlaceBlocks(result));
-                    for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
-                        drop(sv_to_cl_sender.send(response.clone()));
+                        // Process blocks
+                        for i in &data {
+                            if let None = w.remove_block(i.id) {
+                                // Send error message to client
+                                clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
+                                    ProtocolResponse {
+                                        ok: false,
+                                        message: "failed to remove block (block might not exist)".to_string(),
+                                    }))).ok()?;
+                                break;
+                            }
+
+                            result.push(i.clone());
+                        }
+
+                        // Check for success
+                        if result.len() != data.len() {
+                            continue;
+                        }
+
+                        // Send success message to client
+                        clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
+                            ProtocolResponse {
+                                ok: true,
+                                message: "".to_string(),
+                            }))).ok()?;
+
+                        // Send data to all clients
+                        let response = (SERVER_ID.to_string(), Protocol::BothRequestRemoveBlocks(result));
+                        for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
+                            drop(sv_to_cl_sender.1.send(response.clone()));
+                        }
                     }
-                }
-                Protocol::BothRequestUpdateBlocks { .. } => {
-                    todo!();
-                }
-                Protocol::BothRequestRemoveBlocks { .. } => {
-                    todo!();
-                }
-                Protocol::ClientRequestJoin(data) => {
-                    info!("client {} has name {}", client_id, data.name);
-                }
-                Protocol::ClientRequestLeave => {
-                    info!("client {} is leaving", client_id);
-                }
-                _ => {
-                    warn!("received server message from client!");
+                    Protocol::ClientRequestJoin(data) => {
+                        if data.len() > 1 {
+                            // Send error message to client
+                            clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
+                                ProtocolResponse {
+                                    ok: false,
+                                    message: "received more than 1 client".to_string(),
+                                }))).ok()?;
+                        }
+
+                        if let Some(client) = data.get(0) {
+                            info!("client {} has name {}", client_id, client.name);
+                            clients.lock().ok()?.get_mut(&client_id).unwrap().0 = Some(client.clone());
+                        } else {
+                            // Send error message to client
+                            clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
+                                ProtocolResponse {
+                                    ok: false,
+                                    message: "received no data".to_string(),
+                                }))).ok()?;
+                        }
+                    }
+                    Protocol::ClientRequestLeave => {
+                        info!("client {} is leaving", client_id);
+
+                        // Remove client from storage
+                        clients.lock().ok()?.remove(&client_id);
+                    }
+                    _ => {
+                        warn!("received server message from client!");
+                    }
                 }
             }
         }
 
+        /*
         // Send disconnect message to all clients
         for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
             // Ignore errors as the client is supposed to disconnect anyway
-            let _ = sv_to_cl_sender.send((SERVER_ID.to_string(), Protocol::ServerRequestKick));
+            let _ = sv_to_cl_sender.1.send((SERVER_ID.to_string(), Protocol::ServerRequestKick));
         }
 
         return Some(());
+         */
     }
 
     /// Handles network communication to and from a given client (potentially multiple instances of this function)
@@ -305,6 +463,7 @@ impl Network
         }
 
         // End connection
+        outbound.send((addr.to_string(), Protocol::ClientRequestLeave)).ok()?;
         stream.shutdown(Shutdown::Both).ok()?;
 
         Some(())
@@ -351,7 +510,7 @@ impl Network
 
         let (sv_to_cl_sender, sv_to_cl_receiver) = mpsc::channel();
 
-        self.clients.lock().unwrap().insert(addr.to_string(), sv_to_cl_sender);
+        self.clients.lock().unwrap().insert(addr.to_string(), (None, sv_to_cl_sender));
 
         let dup_cl_to_sv_sender = self.stream_sender.clone();
         let dup_connections = self.clients.clone();

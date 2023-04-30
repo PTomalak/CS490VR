@@ -30,6 +30,11 @@ impl<T: Value> Grid<T>
         self.voxels.get_by_left(&location)
     }
 
+    /// Remove the voxel value at the given location
+    pub fn remove(&mut self, location: Coord) -> Option<T> {
+        self.voxels.remove_by_left(&location).map(|e| e.1)
+    }
+
     /// Update the voxel value at the given coordinate using the given function
     ///
     /// Returns whether or not the element was modified (i.e. if it existed)

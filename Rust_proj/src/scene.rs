@@ -8,6 +8,7 @@ use petgraph::dot::Dot;
 use petgraph::graph::NodeIndex;
 use serde::{Deserialize, Serialize};
 
+#[allow(unused_imports)]
 use crate::block::{Block, circuit_voxel, is_circuit_voxel, Orient, PowerState, VoxelClock, VoxelID, VoxelPowered};
 use crate::grid::{Coord, Grid};
 
@@ -49,6 +50,20 @@ impl Scene
     /// NOTE: Does not handle non-forward orientations
     fn get_voxel_location(&self, id: InstanceID, voxel_id: VoxelID) -> Coord {
         self.blocks[&id].0 + self.blocks[&id].2.get_structure()[&voxel_id]
+    }
+
+    /// Get world tick count
+    pub fn get_ticks(&self) -> u32 {
+        self.ticks
+    }
+
+    /// Get the voxels coordinates (global) associated with the provided block
+    fn get_voxel_locations(&self, id: InstanceID) -> Vec<Coord> {
+        self.blocks[&id].2
+            .get_structure()
+            .iter()
+            .map(|(_, coord)| self.blocks[&id].0 + *coord)
+            .collect()
     }
 
     /// Get the circuit nodes associated with the provided block
@@ -259,31 +274,6 @@ impl Scene
 
         // Compute new wire states
 
-        /*
-        // Determine wire network state using the provided wire network and block states
-        // Stored as an external lambda for better readability
-        let compute_wire_network_state =
-            |wire_network: &HashSet<(InstanceID, NodeID)>, blocks: &HashMap<InstanceID, (Coord, Orient, Block)>| -> PowerState {
-                for (_, node_id) in wire_network {
-                    if self.get_neighbor_power(*node_id) == ON {
-                        return ON;
-                    }
-                    /*
-                    for neighbor_node_id in self.circuit.neighbors(*node_id) {
-                        let (neighbor_id, _, _) = self.circuit.node_weight(neighbor_node_id).unwrap();
-                        let neighbor_block = &blocks[neighbor_id].2;
-
-                        if neighbor_block.get_power().unwrap() {
-                            return ON;
-                        }
-                    }
-                     */
-                }
-
-                OFF
-            };
-         */
-
         // Determine wire networks' state prior to this tick's updates
         // This can be done by referencing `self.*` since `self` has not been modified yet
         let contiguous_wire_networks_original_state = contiguous_wire_networks
@@ -365,7 +355,11 @@ impl Scene
     /// Returns the block's ID or `None` if a block overlaps an existing block
     pub fn add_block(&mut self, block: Block, location: Coord, orientation: Orient) -> Option<InstanceID> {
         let id = self.blocks.len() as u32;
+        self.add_block_with_id(id, block, location, orientation)
+    }
 
+    /// Add block with custom ID (internal use only)
+    fn add_block_with_id(&mut self, id: InstanceID, block: Block, location: Coord, orientation: Orient) -> Option<InstanceID> {
         assert!(self.blocks.insert(id, (location, orientation, block.clone())).is_none());
 
         // Check if block overlaps existing block
@@ -411,9 +405,45 @@ impl Scene
         Some(id)
     }
 
-    /// Removes the block with the given ID
-    pub fn _remove_block(&mut self, _id: InstanceID) -> Option<()> {
-        todo!();
+    /// Convenience function used when a block needs to be moved and change state
+    pub fn replace_block(&mut self, id: InstanceID, block: Block, location: Coord, orientation: Orient) -> Option<()> {
+        self.remove_block(id)?;
+        self.add_block_with_id(id, block, location, orientation).map(|_| ())
+    }
+
+    /// Get block data
+    pub fn get_block(&self, id: InstanceID) -> Option<(Coord, Orient, Block)> {
+        self.blocks.get(&id).cloned()
+    }
+
+    /// Updates the block state with the given ID
+    ///
+    /// Returns the old block state
+    pub fn update_block(&mut self, id: InstanceID, block: Block) -> Option<Block> {
+        self.blocks
+            .get_mut(&id)
+            .map(|(_, _, b)| {
+                let current = b.clone();
+                *b = block;
+                current
+            })
+    }
+
+    /// Removes the block with the given ID from all internal data structures
+    pub fn remove_block(&mut self, id: InstanceID) -> Option<(Coord, Orient, Block)> {
+        if !self.blocks.contains_key(&id) {
+            return None;
+        }
+
+        for (_, node_id) in self.get_circuit_nodes(id) {
+            self.circuit.remove_node(node_id).unwrap();
+        }
+
+        for location in self.get_voxel_locations(id) {
+            self.space.remove(location).unwrap();
+        }
+
+        self.blocks.remove(&id)
     }
 
     /// Add a wire that follows the given path
