@@ -25,11 +25,17 @@ pub fn is_circuit_voxel(name: &str) -> bool
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Orient
 {
+    /// Facing +Z
     FORWARD,
+    /// Facing +X
     RIGHT,
+    /// Facing -X
     LEFT,
+    /// Facing -Z
     BACKWARD,
+    /// Facing +Y
     UPWARD,
+    /// Facing -Y
     DOWNWARD,
 }
 
@@ -150,7 +156,48 @@ impl Block
             .is_some()
     }
 
+    /// Return the voxels that make up the block, adjusted to contain global coordinates
+    pub fn get_global_structure(&self, position: Coord, orientation: Orient) -> HashMap<VoxelID, Coord> {
+        self.get_structure()
+            .into_iter()
+            .map(|(id, mut coord)| {
+                match orientation {
+                    Orient::FORWARD => {
+                        // Default orientation, do nothing
+                    }
+                    Orient::RIGHT => {
+                        let t = coord.x;
+                        coord.x = coord.z;
+                        coord.z = t;
+                    }
+                    Orient::LEFT => {
+                        let t = coord.x;
+                        coord.x = -coord.z;
+                        coord.z = -t;
+                    }
+                    Orient::BACKWARD => {
+                        coord.z = -coord.z;
+                        coord.x = -coord.x;
+                    }
+                    Orient::UPWARD => {
+                        let t = coord.y;
+                        coord.y = coord.z;
+                        coord.z = t;
+                    }
+                    Orient::DOWNWARD => {
+                        let t = coord.y;
+                        coord.y = -coord.z;
+                        coord.z = -t;
+                    }
+                }
+
+                (id, coord + position)
+            })
+            .collect()
+    }
+
     /// Return the voxels that make up the block
+    ///
     /// Voxels whose names start with an exclamation are considered as part of the circuit
     pub fn get_structure(&self) -> HashMap<VoxelID, Coord> {
         match self {

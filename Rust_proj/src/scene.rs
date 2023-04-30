@@ -49,7 +49,7 @@ impl Scene
     ///
     /// NOTE: Does not handle non-forward orientations
     fn get_voxel_location(&self, id: InstanceID, voxel_id: VoxelID) -> Coord {
-        self.blocks[&id].0 + self.blocks[&id].2.get_structure()[&voxel_id]
+        self.blocks[&id].2.get_global_structure(self.blocks[&id].0, self.blocks[&id].1)[&voxel_id]
     }
 
     /// Get world tick count
@@ -62,7 +62,7 @@ impl Scene
         self.blocks[&id].2
             .get_structure()
             .iter()
-            .map(|(_, coord)| self.blocks[&id].0 + *coord)
+            .map(|(voxel_id, _)| self.get_voxel_location(id, voxel_id.clone()))
             .collect()
     }
 
@@ -364,8 +364,8 @@ impl Scene
 
         // Check if block overlaps existing block
 
-        for (_, voxel_relative_location) in block.get_structure() {
-            if self.space.contains(location + voxel_relative_location) {
+        for (_, voxel_location) in block.get_global_structure(location, orientation) {
+            if self.space.contains(voxel_location) {
                 return None;
             }
         }
@@ -381,8 +381,8 @@ impl Scene
 
         // Add all voxels (including non-terminals) to grid
 
-        for (voxel_id, voxel_relative_location) in block.get_structure() {
-            self.space.set(location + voxel_relative_location,
+        for (voxel_id, voxel_location) in block.get_global_structure(location, orientation) {
+            self.space.set(voxel_location,
                            (id, voxel_id.clone(), terminal_node_ids.get(&voxel_id).copied()));
         }
 
