@@ -27,8 +27,9 @@ def server_program():
                 continue
             print(d)
             js = json.loads(d)
-            if ('ok' in js):
+            if (not 'action' in js):
                 continue
+            print(">>")
 
             # Mirror other data
             # data = input(' -> ')

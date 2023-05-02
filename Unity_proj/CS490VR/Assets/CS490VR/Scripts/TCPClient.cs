@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Linq;
 using UnityEngine;
 
 public class TCPClient : MonoBehaviour
 {
     #region components
     JSONParser jp;
+    public PlayerManager pm;
     #endregion
 
     #region fields
@@ -23,10 +25,17 @@ public class TCPClient : MonoBehaviour
     ///// ADAPTED FROM BOILERPLATE TCP CLIENT CODE /////
 
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
         jp = GetComponent<JSONParser>();
         Connect(IP, PORT);
+        StartCoroutine(SendInitialConnection());
+    }
+
+    IEnumerator SendInitialConnection()
+    {
+        yield return new WaitForSeconds(1.5f);
+        pm.InitializePlayer(DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
     }
 
     private void OnDestroy()
@@ -63,10 +72,13 @@ public class TCPClient : MonoBehaviour
             Byte[] bytes = new Byte[1024];
             while (true)
             {
-                // Get a stream object for reading 				
+                // Get a stream object for readings
                 using (NetworkStream stream = socketConnection.GetStream())
                 {
                     int length;
+
+                    string compiledJson = "";
+
                     // Read incomming stream into byte arrary. 					
                     while ((length = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
@@ -75,13 +87,34 @@ public class TCPClient : MonoBehaviour
                         // Convert byte array to string message. 						
                         string serverMessage = Encoding.ASCII.GetString(incommingData);
 
-                        string[] modifiedMessage = serverMessage.Replace("}{", "}||{").Split("||");
-
-                        // Split up the server message in case its multiple JSONs
-                        foreach (string message in modifiedMessage)
+                        // Check if we got multiple JSON objects in one message
+                        // String manipulation is poor for performance, but I don't really care
+                        compiledJson += serverMessage;
+                        int index = compiledJson.IndexOf("}{");
+                        while (index >= 0)
                         {
-                            // Pass the message to the JSON Parser
-                            jp.incomingActions.Enqueue(message);
+                            // We have collected one json and started a second one
+                            string json = compiledJson.Substring(0, index+1);
+                            compiledJson = compiledJson[(index + 1)..];
+
+                            // Receive action
+                            Debug.Log("RECEIVE(A): " + json);
+                            jp.incomingActions.Enqueue(json);
+
+                            index = compiledJson.IndexOf("}{");
+                        }
+
+                        // Check if our overall compiled JSON message is a single JSON object
+                        // Also poor for performance, also don't care
+                        int opening = compiledJson.Count(t => t == '{');
+                        int closing = compiledJson.Count(t => t == '}');
+                        if (opening == closing)
+                        {
+                            // Receive action
+                            Debug.Log("RECEIVE(B): " + compiledJson);
+                            jp.incomingActions.Enqueue(compiledJson);
+
+                            compiledJson = "";
                         }
                     }
                 }
@@ -95,6 +128,8 @@ public class TCPClient : MonoBehaviour
 
     public void SendJson(string request)
     {
+        Debug.Log("SEND: " + request);
+
         if (socketConnection == null)
         {
             return;

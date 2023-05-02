@@ -10,9 +10,9 @@ public interface IDataLoader
     // Unload old changes into the environment (when updated or destroyed)
     public virtual void Unload() {}
 
-    // Set this loader's BlockData
-    public virtual void SetData(BlockData o) {}
-
-    // Get this loader's BlockData
+    // Get this loader's BlockData object
     public virtual BlockData GetData() { return null; }
+
+    // Get this loader's default state
+    public virtual BlockData GetDefaultState() { return new BlockData(); }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7481897490207479638}
   - component: {fileID: 6131788641265745983}
   - component: {fileID: 5881493368908584952}
-  - component: {fileID: 6848941079886714421}
+  - component: {fileID: 5393913694207066227}
   m_Layer: 7
   m_Name: Pixel
   m_TagString: Untagged
@@ -98,7 +98,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6848941079886714421
+--- !u!114 &5393913694207066227
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,11 +107,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1079769595136392027}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a90ace18f026518478a5d67f573ee7d1, type: 3}
+  m_Script: {fileID: 11500000, guid: 9d442b2bdcc540c459cad421313adb12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   data:
     id: 0
-    position: 000000000000000000000000
-    powered: 0
-    pl: {fileID: 11400000, guid: 925d4c90f51be334bb656d50767f1169, type: 2}
+    position:
+      x: 0
+      y: 0
+      z: 0
+    rotation: FORWARD
+    data:
+      block: 
+  block: pixel
+  powerableTextures: {fileID: 11400000, guid: 925d4c90f51be334bb656d50767f1169, type: 2}

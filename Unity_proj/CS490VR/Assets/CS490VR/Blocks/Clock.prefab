@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8153811107086540080}
   - component: {fileID: 4892421471400921689}
   - component: {fileID: 5143780577101454750}
-  - component: {fileID: 5328164902866082899}
+  - component: {fileID: 2215547542570563381}
   m_Layer: 7
   m_Name: Clock
   m_TagString: Untagged
@@ -98,7 +98,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5328164902866082899
+--- !u!114 &2215547542570563381
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,11 +107,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1729732562956071229}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a90ace18f026518478a5d67f573ee7d1, type: 3}
+  m_Script: {fileID: 11500000, guid: 9d442b2bdcc540c459cad421313adb12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   data:
     id: 0
-    position: 000000000000000000000000
-    powered: 0
-    pl: {fileID: 11400000, guid: d4649a46b128de7429efb2e7f1af4ec5, type: 2}
+    position:
+      x: 0
+      y: 0
+      z: 0
+    rotation: FORWARD
+    data:
+      block: 
+  block: clock
+  powerableTextures: {fileID: 11400000, guid: d4649a46b128de7429efb2e7f1af4ec5, type: 2}

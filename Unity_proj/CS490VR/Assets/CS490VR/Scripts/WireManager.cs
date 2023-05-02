@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 using static JSONParser;
 
 public class WireManager : MonoBehaviour
@@ -50,13 +51,14 @@ public class WireManager : MonoBehaviour
         return true;
     }
 
-    public bool PlaceWire(PowerableData data)
+    public bool PlaceWire(BlockData data)
     {
-        Vector3Int p = data.position;
-        return AddWire(p.x, p.y, p.z, data.id, data.powered);
+        Vector3Int p = data.position.GetVector();
+        AdditionalData.Powered pow = AdditionalData.GetPoweredData(data.data.data);
+        return AddWire(p.x, p.y, p.z, data.id, pow.powered);
     }
 
-    public bool UpdateWire(int id, PowerableData data)
+    public bool UpdateWire(int id, BlockData data)
     {
         if (!wire_ids.ContainsKey(id)) return false;
 
@@ -65,14 +67,15 @@ public class WireManager : MonoBehaviour
 
         if (!wire_map.ContainsKey(coords)) return false;
 
-        if (coords == data.position)
+        AdditionalData.Powered pow = AdditionalData.GetPoweredData(data.data.data);
+        if (coords == data.position.GetVector())
         {
-            wire_map[coords].powered = data.powered;
+            wire_map[coords].powered = pow.powered;
         } else
         {
-            wire_ids[id] = data.position;
+            wire_ids[id] = data.position.GetVector();
             wire_map.Remove(coords);
-            wire_map.Add(data.position, new WireData(id, data.powered));
+            wire_map.Add(data.position.GetVector(), new WireData(id, pow.powered));
         }
 
         hasChanged = true;

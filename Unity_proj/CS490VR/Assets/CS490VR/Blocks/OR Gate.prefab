@@ -111,8 +111,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   data:
+    block: 
     id: 0
-    position: 000000000000000000000000
+    position: {x: 0, y: 0, z: 0}
     powered: 0
     pl: {fileID: 11400000, guid: caeca8478f22879419ebd217894d079e, type: 2}
     rotation: 0

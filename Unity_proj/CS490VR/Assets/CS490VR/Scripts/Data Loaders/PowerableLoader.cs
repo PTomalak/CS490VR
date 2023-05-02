@@ -1,34 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
-public class PowerableLoader : MonoBehaviour, IDataLoader
+public class PowerableLoader : BlockLoader
 {
-    public PowerableData data;
+    public PoweredTextures powerableTextures;
 
     // Components
     #region components
-    BlockManager bm;
+    protected BlockManager bm;
     #endregion
 
-    public void Load()
+    public override void Load()
     {
-        data.UpdateObject(gameObject);
+        // Set position
+        base.Load();
 
-        // Add wire connection at our position
-        if (!bm) bm = GetComponentInParent<BlockManager>();
-        bm.wm.AddConnection(data.position);
+        // Set texture
+        AdditionalData.Powered pow = AdditionalData.GetPoweredData(data.data.data);
+        gameObject.GetComponent<Renderer>().material = (pow.powered) ? powerableTextures.ON_MATERIAL : powerableTextures.OFF_MATERIAL;
     }
 
-    public void Unload()
+    public override BlockData GetDefaultState()
     {
-        // Remove wire connection at our position
-        if (!bm) bm = GetComponentInParent<BlockManager>();
-        bm.wm.RemoveConnection(data.position);
-    }
-
-    public BlockData GetData()
-    {
-        return data;
+        AdditionalData.Powered pow = new AdditionalData.Powered();
+        BlockData new_data = new BlockData();
+        new_data.SetAdditionalData(block, pow);
+        return new_data;
     }
 }
