@@ -12,6 +12,11 @@ public class PowerableLoader : BlockLoader
     protected BlockManager bm;
     #endregion
 
+    private void Awake()
+    {
+        if (!bm) bm = GetComponentInParent<BlockManager>();
+    }
+
     public override void Load()
     {
         // Set position

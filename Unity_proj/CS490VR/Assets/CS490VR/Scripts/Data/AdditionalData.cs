@@ -45,4 +45,9 @@ public class AdditionalData
     {
         return JsonConvert.DeserializeObject<Powered>(JsonConvert.SerializeObject(o));
     }
+
+    public static Pulse GetPulseData(object o)
+    {
+        return JsonConvert.DeserializeObject<Pulse>(JsonConvert.SerializeObject(o));
+    }
 }

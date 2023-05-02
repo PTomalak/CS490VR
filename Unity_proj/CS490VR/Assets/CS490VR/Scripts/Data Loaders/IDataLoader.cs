@@ -15,4 +15,7 @@ public interface IDataLoader
 
     // Get this loader's default state
     public virtual BlockData GetDefaultState() { return new BlockData(); }
+
+    // Update this loader's state based on the tick
+    public virtual void UpdateFromTick(BlockData target, BlockManager bm) { }
 }

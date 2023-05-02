@@ -14,6 +14,7 @@ public class BlockLoader : MonoBehaviour, IDataLoader
 
     public virtual void Unload()
     {
+        // Do nothing by default
     }
 
     public BlockData GetData()
@@ -26,5 +27,10 @@ public class BlockLoader : MonoBehaviour, IDataLoader
         BlockData new_data = new BlockData();
         new_data.SetAdditionalData(block, new { });
         return new_data;
+    }
+
+    public virtual void UpdateFromTick(BlockData target, BlockManager bm)
+    {
+        // Do nothing by default
     }
 }

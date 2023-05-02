@@ -27,6 +27,15 @@ public class JSONParser : MonoBehaviour
             this.data = data;
         }
     }
+    public class UpdateAction : Action
+    {
+        public object[] data;
+        public UpdateAction(object up)
+        {
+            this.action = "BothRequestUpdateBlocks";
+            this.data = new object[1] { up };
+        }
+    }
     public class RemoveAction : Action
     {
         public RemoveData[] data;
@@ -172,6 +181,11 @@ public class JSONParser : MonoBehaviour
                 tc.SendJson(JsonConvert.SerializeObject(new PlaceUpdateAction("BothRequestUpdateBlocks",data)));
                 break;
         }
+    }
+
+    public void SendUpdateRequest(object data)
+    {
+        tc.SendJson(JsonConvert.SerializeObject(new UpdateAction(data)));
     }
 
     // Convert local request into JSON and send request

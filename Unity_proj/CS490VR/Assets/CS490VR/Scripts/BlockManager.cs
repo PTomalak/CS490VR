@@ -8,8 +8,7 @@ using static JSONParser;
 public class BlockManager : MonoBehaviour
 {
     #region components
-    JSONParser jp;
-    TCPClient tc;
+    public JSONParser jp;
     public WireManager wm;
     #endregion
 
@@ -181,6 +180,7 @@ public class BlockManager : MonoBehaviour
 
         // Obtaine block's default data to pass to server
         BlockData data = dl.GetDefaultState();
+        dl.UpdateFromTick(data, this);
 
         // Set position and block type, and zero the ID
         data.id = 0;
@@ -267,6 +267,9 @@ public class BlockManager : MonoBehaviour
             JsonConvert.PopulateObject(JsonConvert.SerializeObject(data), dl.GetData());
             jp.SendRequest("update", dl.GetData());
             JsonConvert.PopulateObject(saved_data, dl.GetData());
+
+            // Altenatively just update request with the data
+            
         }
 
         
@@ -277,7 +280,6 @@ public class BlockManager : MonoBehaviour
 
     private void Awake()
     {
-        tc = GetComponent<TCPClient>();
         jp = GetComponent<JSONParser>();
         wm = GetComponentInChildren<WireManager>();
     }

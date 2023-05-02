@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6750926945887566962}
   - component: {fileID: 8033695105948986139}
   - component: {fileID: 7780625197661764828}
-  - component: {fileID: 6740722263808951122}
+  - component: {fileID: 9061640440894890639}
   m_Layer: 7
   m_Name: Memory Latch
   m_TagString: Untagged
@@ -98,7 +98,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6740722263808951122
+--- !u!114 &9061640440894890639
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,12 +107,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 3790072465495330943}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04a65596b454b21428ea0bd674858a80, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d9e9e5346ff46a42b529a88f5f58261, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   data:
     id: 0
-    position: 000000000000000000000000
-    powered: 0
-    pl: {fileID: 11400000, guid: 5adcb67653a121c4abf2f11e4589cce6, type: 2}
-    rotation: 0
+    position:
+      x: 0
+      y: 0
+      z: 0
+    rotation: FORWARD
+    data:
+      block: 
+  block: memory_latch
+  powerableTextures: {fileID: 11400000, guid: 5adcb67653a121c4abf2f11e4589cce6, type: 2}

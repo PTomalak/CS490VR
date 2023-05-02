@@ -112,7 +112,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     id: 0
-    position: 000000000000000000000000
-    powered: 0
-    pl: {fileID: 11400000, guid: d8626120c56bd0241ba10f05a5953d4c, type: 2}
+    position:
+      x: 0
+      y: 0
+      z: 0
     rotation: 0
+    data:
+      block: 
+  block: xor_gate
+  powerableTextures: {fileID: 11400000, guid: d8626120c56bd0241ba10f05a5953d4c, type: 2}
