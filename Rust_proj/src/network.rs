@@ -6,12 +6,13 @@ use std::sync::{Arc, mpsc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant, UNIX_EPOCH};
 
-use cgmath::{Vector3, Zero};
+use cgmath::Vector3;
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 
 use crate::block::{Block, Orient};
 use crate::grid::Coord;
+use crate::network::Protocol::BothRequestPlaceBlocks;
 use crate::scene::{InstanceID, Scene};
 
 pub type ClientID = String;
@@ -57,7 +58,7 @@ pub struct Client
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProtocolPlaceBlock
 {
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     id: Option<InstanceID>,
     position: Coord,
     rotation: Orient,
@@ -74,11 +75,11 @@ pub struct ProtocolRemoveBlock
 pub struct ProtocolUpdateBlock
 {
     id: InstanceID,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     position: Option<Coord>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     rotation: Option<Orient>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     data: Option<Block>,
 }
 
@@ -108,12 +109,27 @@ pub enum Protocol
     BothRequestUpdateBlocks(Vec<ProtocolUpdateBlock>),
     BothRequestRemoveBlocks(Vec<ProtocolRemoveBlock>),
 
-    // Only expects 1 client, but stored as vector for consistency
-    ClientRequestJoin(Vec<Client>),
+    ClientRequestJoin(Client),
     ClientRequestLeave,
 
     ServerRequestKick,
     ServerResponseMetadata(ProtocolResponseMetadata),
+}
+
+#[test]
+fn serialize_test()
+{
+    #[allow(unused_imports)]
+    use crate::block::{Block::Clock, VoxelClock};
+
+    let p = BothRequestPlaceBlocks(vec![ProtocolPlaceBlock {
+        id: Some(5),
+        position: Vector3::unit_y(),
+        rotation: Orient::FORWARD,
+        data: Clock(VoxelClock::default()),
+    }]);
+
+    println!("{}", serde_json::to_string_pretty(&p).unwrap());
 }
 
 pub struct Network
@@ -129,13 +145,6 @@ pub struct Network
     stream_receiver: MessageReceiver,
 }
 
-impl Drop for Network
-{
-    fn drop(&mut self) {
-        info!("Server stopping");
-    }
-}
-
 impl Network
 {
     /// Handles combined messages from clients (only one instance of this function)
@@ -145,16 +154,45 @@ impl Network
         let mut last_save = Instant::now();
         let mut last_tick = Instant::now();
 
+        let (end_tx, end_rx) = mpsc::channel();
+        ctrlc::set_handler(move || end_tx.send(())
+            .expect("failed to send signal on channel"))
+            .expect("failed to set Ctrl+C handler");
+
         info!("running main server loop");
 
         // Server run loop
         loop {
+            // Check if server needs to quit
+            let should_quit = end_rx.try_recv().is_ok();
+
             // Check if a save needs to be performed
-            if last_save.elapsed() >= settings.autosave_duration {
+            if last_save.elapsed() >= settings.autosave_duration || should_quit {
                 info!("saving world...");
                 w.save(&settings.save_path);
                 info!("successfully saved world to \"{}\" (next save in {}s)", settings.save_path.to_str().unwrap(), settings.autosave_duration.as_secs_f32());
                 last_save = Instant::now();
+            }
+
+            // Exit loop if signal received
+            if should_quit {
+                info!("received termination signal, exiting...");
+
+                // Send disconnect message to all clients
+                for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
+                    // Ignore errors as the client is supposed to disconnect anyway
+                    let _ = sv_to_cl_sender.1.send((SERVER_ID.to_string(), Protocol::ServerRequestKick));
+                }
+
+                // Wait for clients to leave (hardcoded wait)
+                thread::sleep(Duration::from_secs(1));
+
+                // Remove clients from storage
+                clients.lock().ok()?.clear();
+
+                info!("dropped all clients");
+
+                break;
             }
 
             // Check if a tick needs to be simulated (and associated tasks)
@@ -171,11 +209,7 @@ impl Network
                         .lock()
                         .ok()?
                         .iter()
-                        .map(|(id, (c, _))| c.clone().unwrap_or(Client {
-                            name: id.to_string(),
-                            position: Vector3::zero(),
-                            direction: Vector3::zero(),
-                        }))
+                        .filter_map(|(_, (c, _))| c.clone())
                         .collect(),
                 }));
                 for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
@@ -196,7 +230,7 @@ impl Network
             }
 
             // Process global message queue (from all clients)
-            if let Some(message) = queue.lock().unwrap().try_recv().ok() { // for message in queue.lock().unwrap().iter() {
+            if let Some(message) = queue.lock().ok()?.try_recv().ok() { // for message in queue.lock().unwrap().iter() {
                 let client_id = message.0;
 
                 // Process message
@@ -215,30 +249,21 @@ impl Network
 
                         // Process blocks
                         for i in &data {
-                            if i.id.is_some() {
+                            if let Some(instanceid) = w.add_block(i.data.clone(), i.position, i.rotation) {
+                                result.push(ProtocolPlaceBlock {
+                                    id: Some(instanceid),
+                                    position: i.position,
+                                    rotation: i.rotation,
+                                    data: i.data.clone(),
+                                });
+                            } else {
+                                // Send error message to client
                                 clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
                                     ProtocolResponse {
                                         ok: false,
-                                        message: "did not expect instance ID".to_string(),
+                                        message: "block overlaps existing block".to_string(),
                                     }))).ok()?;
                                 break;
-                            } else {
-                                if let Some(instanceid) = w.add_block(i.data.clone(), i.position, i.rotation) {
-                                    result.push(ProtocolPlaceBlock {
-                                        id: Some(instanceid),
-                                        position: i.position,
-                                        rotation: i.rotation,
-                                        data: i.data.clone(),
-                                    });
-                                } else {
-                                    // Send error message to client
-                                    clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
-                                        ProtocolResponse {
-                                            ok: false,
-                                            message: "block overlaps existing block".to_string(),
-                                        }))).ok()?;
-                                    break;
-                                }
                             }
                         }
 
@@ -272,8 +297,7 @@ impl Network
                                                         i.data.clone().unwrap_or(block),
                                                         i.position.unwrap_or(coord),
                                                         i.rotation.unwrap_or(orient))
-                                            .unwrap()
-                                    })
+                                    })?
                             } else if let Some(d) = i.data.clone() {
                                 w.update_block(i.id, d)
                                     .map(|_| ())
@@ -349,26 +373,23 @@ impl Network
                         }
                     }
                     Protocol::ClientRequestJoin(data) => {
-                        if data.len() > 1 {
-                            // Send error message to client
-                            clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
-                                ProtocolResponse {
-                                    ok: false,
-                                    message: "received more than 1 client".to_string(),
-                                }))).ok()?;
-                        }
+                        info!("client {} has name {}", client_id, data.name);
+                        clients.lock().ok()?.get_mut(&client_id).unwrap().0 = Some(data.clone());
 
-                        if let Some(client) = data.get(0) {
-                            info!("client {} has name {}", client_id, client.name);
-                            clients.lock().ok()?.get_mut(&client_id).unwrap().0 = Some(client.clone());
-                        } else {
-                            // Send error message to client
-                            clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), Protocol::BothResponse(
-                                ProtocolResponse {
-                                    ok: false,
-                                    message: "received no data".to_string(),
-                                }))).ok()?;
-                        }
+                        // Send world state as of this tick
+
+                        let world_data = BothRequestPlaceBlocks(w
+                            .get_world_blocks()
+                            .into_iter()
+                            .map(|(id, (position, rotation, data))| ProtocolPlaceBlock {
+                                id: Some(id),
+                                position,
+                                rotation,
+                                data,
+                            })
+                            .collect());
+
+                        clients.lock().ok()?[&client_id].1.send((SERVER_ID.to_string(), world_data)).ok()?;
                     }
                     Protocol::ClientRequestLeave => {
                         info!("client {} is leaving", client_id);
@@ -383,15 +404,7 @@ impl Network
             }
         }
 
-        /*
-        // Send disconnect message to all clients
-        for (_, sv_to_cl_sender) in clients.lock().ok()?.iter() {
-            // Ignore errors as the client is supposed to disconnect anyway
-            let _ = sv_to_cl_sender.1.send((SERVER_ID.to_string(), Protocol::ServerRequestKick));
-        }
-
         return Some(());
-         */
     }
 
     /// Handles network communication to and from a given client (potentially multiple instances of this function)
@@ -489,7 +502,7 @@ impl Network
         let dup_world = self.world.clone();
         let dup_clients = self.clients.clone();
         let dup_saves = self.saves.clone();
-        thread::spawn(move || {
+        let server_handle = thread::spawn(move || {
             if Self::server_handler(dup_stream, dup_world, dup_clients, dup_saves).is_none() {
                 error!("server terminated with an error");
             } else {
@@ -498,13 +511,17 @@ impl Network
         });
 
         // Main client connection-handling loop
+        self.listener.set_nonblocking(true).unwrap();
         loop {
-            self.accept_client();
+            let _ = self.accept_client();
+            if server_handle.is_finished() {
+                break;
+            }
         }
     }
 
-    pub fn accept_client(&mut self) {
-        let (stream, addr) = self.listener.accept().expect("failed to accept new client");
+    pub fn accept_client(&mut self) -> Option<()> {
+        let (stream, addr) = self.listener.accept().ok()?;
 
         info!("client connected from {}", addr);
 
@@ -525,5 +542,7 @@ impl Network
                 info!("client {} disconnected", addr);
             }
         });
+
+        Some(())
     }
 }

@@ -3,6 +3,7 @@ target/
 
 *.world
 *.dot
-*.pdf
+*.dot.pdf
+*.dot.png
 
 Cargo.lock

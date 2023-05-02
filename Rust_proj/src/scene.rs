@@ -3,9 +3,10 @@ use std::path::Path;
 use std::process::Command;
 
 use cgmath::Array;
-use petgraph::{Graph, Undirected};
+use petgraph::Undirected;
 use petgraph::dot::Dot;
 use petgraph::graph::NodeIndex;
+use petgraph::stable_graph::StableGraph;
 use serde::{Deserialize, Serialize};
 
 #[allow(unused_imports)]
@@ -24,7 +25,7 @@ pub const ON: PowerState = true;
 pub struct Scene
 {
     blocks: HashMap<InstanceID, (Coord, Orient, Block)>,
-    circuit: Graph<(InstanceID, VoxelID, Coord), PowerState, Undirected, NodeIDType>,
+    circuit: StableGraph<(InstanceID, VoxelID, Coord), PowerState, Undirected, NodeIDType>,
     space: Grid<(InstanceID, VoxelID, Option<NodeID>)>,
     ticks: u32,
 }
@@ -70,20 +71,20 @@ impl Scene
     fn get_circuit_nodes(&self, id: InstanceID) -> HashMap<VoxelID, NodeID> {
         self.blocks[&id]
             .2
-            .get_circuit_voxels()
+            .get_global_circuit_voxels(self.blocks[&id].0, self.blocks[&id].1)
             .iter()
             .map(|(voxel_id, coord)|
-                (voxel_id.clone(), self.space.get(*coord).unwrap().2.unwrap()))
+                (voxel_id.clone(), self.space.get(*coord).expect(&format!("voxel {} does not exist", voxel_id)).2.expect("voxel does not have a circuit node")))
             .collect()
     }
 
-    /// Determine if any of the given node's neighbors are powered
-    fn get_neighbor_power(&self, node_id: NodeID) -> PowerState {
+    /// Determine if any of the given node's edges are independently powered
+    fn get_edge_independent_power(&self, node_id: NodeID) -> PowerState {
         self.circuit
             .neighbors(node_id)
             .any(|e| {
-                let (id, _, _) = self.circuit.node_weight(e).unwrap();
-                self.blocks[id].2.get_non_wire_power().unwrap_or(OFF)
+                let (id, voxel_id, _) = self.circuit.node_weight(e).unwrap();
+                self.blocks[id].2.get_circuit_voxel_power()[voxel_id].unwrap_or(OFF)
             })
     }
 
@@ -98,6 +99,11 @@ impl Scene
             .args(["-Tpng", path.to_str().unwrap(), "-o", &format!("{}.png", path.to_str().unwrap())])
             .spawn()
             .unwrap();
+    }
+
+    /// Retrieve a copy of all blocks and corresponding states
+    pub fn get_world_blocks(&self) -> HashMap<InstanceID, (Coord, Orient, Block)> {
+        self.blocks.clone()
     }
 
     /// Performs one simulation tick of the circuit
@@ -147,7 +153,7 @@ impl Scene
 
                         // Get input node state
 
-                        let input_state = self.get_neighbor_power(input_node);
+                        let input_state = self.get_edge_independent_power(input_node);
 
                         // Compute output state
 
@@ -160,8 +166,8 @@ impl Scene
 
                         // Get input node states
 
-                        let input_a_state = self.get_neighbor_power(input_a_node);
-                        let input_b_state = self.get_neighbor_power(input_b_node);
+                        let input_a_state = self.get_edge_independent_power(input_a_node);
+                        let input_b_state = self.get_edge_independent_power(input_b_node);
 
                         // Compute output state
 
@@ -174,12 +180,68 @@ impl Scene
 
                         // Get input node states
 
-                        let input_a_state = self.get_neighbor_power(input_a_node);
-                        let input_b_state = self.get_neighbor_power(input_b_node);
+                        let input_a_state = self.get_edge_independent_power(input_a_node);
+                        let input_b_state = self.get_edge_independent_power(input_b_node);
 
                         // Compute output state
 
                         data.powered = input_a_state || input_b_state;
+                    }
+                    Block::XORGate(data) => {
+                        // Get named nodes
+                        let (input_a_node, input_b_node, _output_node) =
+                            (node_ids[&circuit_voxel("in_a")], node_ids[&circuit_voxel("in_b")], node_ids[&circuit_voxel("out")]);
+
+                        // Get input node states
+
+                        let input_a_state = self.get_edge_independent_power(input_a_node);
+                        let input_b_state = self.get_edge_independent_power(input_b_node);
+
+                        // Compute output state
+
+                        data.powered = input_a_state != input_b_state;
+                    }
+                    Block::NANDGate(data) => {
+                        // Get named nodes
+                        let (input_a_node, input_b_node, _output_node) =
+                            (node_ids[&circuit_voxel("in_a")], node_ids[&circuit_voxel("in_b")], node_ids[&circuit_voxel("out")]);
+
+                        // Get input node states
+
+                        let input_a_state = self.get_edge_independent_power(input_a_node);
+                        let input_b_state = self.get_edge_independent_power(input_b_node);
+
+                        // Compute output state
+
+                        data.powered = !(input_a_state && input_b_state);
+                    }
+                    Block::NORGate(data) => {
+                        // Get named nodes
+                        let (input_a_node, input_b_node, _output_node) =
+                            (node_ids[&circuit_voxel("in_a")], node_ids[&circuit_voxel("in_b")], node_ids[&circuit_voxel("out")]);
+
+                        // Get input node states
+
+                        let input_a_state = self.get_edge_independent_power(input_a_node);
+                        let input_b_state = self.get_edge_independent_power(input_b_node);
+
+                        // Compute output state
+
+                        data.powered = !(input_a_state || input_b_state);
+                    }
+                    Block::XNORGate(data) => {
+                        // Get named nodes
+                        let (input_a_node, input_b_node, _output_node) =
+                            (node_ids[&circuit_voxel("in_a")], node_ids[&circuit_voxel("in_b")], node_ids[&circuit_voxel("out")]);
+
+                        // Get input node states
+
+                        let input_a_state = self.get_edge_independent_power(input_a_node);
+                        let input_b_state = self.get_edge_independent_power(input_b_node);
+
+                        // Compute output state
+
+                        data.powered = input_a_state == input_b_state;
                     }
                     Block::NOTGate(data) => {
                         // Get named nodes
@@ -188,7 +250,7 @@ impl Scene
 
                         // Get input node state
 
-                        let input_state = self.get_neighbor_power(input_node);
+                        let input_state = self.get_edge_independent_power(input_node);
 
                         // Compute output state
 
@@ -213,6 +275,79 @@ impl Scene
                         // Compute pulse state
 
                         data.powered = data.start_tick + data.pulse_ticks >= self.ticks;
+                    }
+                    Block::Diode(data) => {
+                        // Get named nodes
+                        let (input_node, _output_node) =
+                            (node_ids[&circuit_voxel("in")], node_ids[&circuit_voxel("out")]);
+
+                        // Get input node state
+
+                        let input_state = self.get_edge_independent_power(input_node);
+
+                        // Compute output state
+
+                        data.powered = input_state;
+                    }
+                    Block::ToggleLatch(data) => {
+                        // Get named nodes
+                        let (input_node, _output_node) =
+                            (node_ids[&circuit_voxel("in")], node_ids[&circuit_voxel("out")]);
+
+                        // Get input node state
+
+                        let input_state = self.get_edge_independent_power(input_node);
+
+                        // Compute output state
+
+                        data.stored = if input_state && !data.powered {
+                            !data.stored
+                        } else {
+                            data.stored
+                        };
+                        data.powered = input_state;
+                    }
+                    Block::PulseLatch(data) => {
+                        // Get named nodes
+                        let (input_node, _output_node) =
+                            (node_ids[&circuit_voxel("in")], node_ids[&circuit_voxel("out")]);
+
+                        // Get input node state
+
+                        let input_state = self.get_edge_independent_power(input_node);
+
+                        // Compute output state
+
+                        data.pulse_battery = data.pulse_battery.checked_sub(1).unwrap_or(0) +
+                            if input_state {
+                                data.pulse_ticks
+                            } else {
+                                0
+                            };
+                        data.powered = data.pulse_battery > 0;
+                    }
+                    Block::MemoryLatch(data) => {
+                        // Get named nodes
+                        let (input_a_node, input_b_node, _output_node) =
+                            (node_ids[&circuit_voxel("in_a")], node_ids[&circuit_voxel("in_b")], node_ids[&circuit_voxel("out")]);
+
+                        // Get input node states
+
+                        let input_a_state = self.get_edge_independent_power(input_a_node);
+                        let input_b_state = self.get_edge_independent_power(input_b_node);
+
+                        // Compute output state
+
+                        data.stored = if input_a_state == input_b_state {
+                            data.stored
+                        } else {
+                            if input_a_state {
+                                ON
+                            } else {
+                                OFF
+                            }
+                        };
+                        data.powered = data.stored;
                     }
                     _ => panic!("not possible, encountered non-circuit or wire block")
                 }
@@ -239,7 +374,7 @@ impl Scene
         fn bfs_wires(
             root: NodeID,
             blocks: &HashMap<InstanceID, (Coord, Orient, Block)>,
-            circuit: &Graph<(InstanceID, VoxelID, Coord), PowerState, Undirected, NodeIDType>,
+            circuit: &StableGraph<(InstanceID, VoxelID, Coord), PowerState, Undirected, NodeIDType>,
             visited: &mut HashSet<NodeID>)
         {
             let neighbor_wires = circuit
@@ -287,12 +422,20 @@ impl Scene
             }))
             .collect::<Vec<PowerState>>();
 
-        // Determine wire networks' state (prior to this tick's non-wire circuit block updates)
+        // Determine wire networks' state (after this tick's non-wire circuit block updates)
         let contiguous_wire_networks_updated_state = contiguous_wire_networks
             .iter()
             .map(|wire_network| {
                 for (_, node_id) in wire_network {
-                    if self.get_neighbor_power(*node_id) == ON {
+                    // Check if this node's non-wire neighbors are independently powered (i.e. powered from outside this wire network)
+                    // Same as `self.get_edge_independent_power()` but uses the updated circuit block state
+                    if self.circuit
+                        .neighbors(*node_id)
+                        .filter(|e| non_wire_circuit_blocks_updated.contains_key(&self.circuit.node_weight(*e).unwrap().0))
+                        .any(|e| {
+                            let (id, voxel_id, _) = self.circuit.node_weight(e).unwrap();
+                            non_wire_circuit_blocks_updated[id].get_circuit_voxel_power()[voxel_id].unwrap_or(OFF)
+                        }) {
                         return ON;
                     }
                 }
@@ -331,12 +474,13 @@ impl Scene
         }
 
         // Circuit edges
-        for i in self.circuit.edge_indices() {
+        let edge_indices = self.circuit.edge_indices().collect::<Vec<_>>();
+        for i in edge_indices {
             let (node_a, node_b) = self.circuit.edge_endpoints(i).unwrap();
             let (id_a, id_b) = (self.circuit.node_weight(node_a).unwrap().0, self.circuit.node_weight(node_b).unwrap().0);
             let (block_a, block_b) = (&self.blocks[&id_a].2, &self.blocks[&id_b].2);
 
-            if block_a.get_circuit_power().unwrap_or(OFF) == ON || block_b.get_circuit_power().unwrap_or(OFF) == ON {
+            if block_a.get_circuit_power().unwrap_or(OFF) || block_b.get_circuit_power().unwrap_or(OFF) {
                 self.circuit.update_edge(node_a, node_b, ON);
             } else {
                 self.circuit.update_edge(node_a, node_b, OFF);
@@ -473,7 +617,40 @@ impl Scene
 }
 
 #[test]
-pub fn scene_test()
+pub fn scene_test_gate()
+{
+    let mut scene = Scene::default();
+
+    let l = 10;
+    let _ = scene.add_wire((0..l).map(|e| Coord::new(-1, 0, e)).collect()).unwrap();
+    let _ = scene.add_wire((0..l).map(|e| Coord::new(1, 0, e)).collect()).unwrap();
+    let _ = scene.add_wire((0..l).map(|e| Coord::new(0, 0, l + 3 + e)).collect()).unwrap();
+    let _clock_a = scene.add_block(Block::Clock(VoxelClock {
+        rate: 5,
+        start_tick: 0,
+        powered: false,
+    }), Coord::new(-1, 0, -1), Default::default()).unwrap();
+    let _clock_b = scene.add_block(Block::Clock(VoxelClock {
+        rate: 3,
+        start_tick: 0,
+        powered: false,
+    }), Coord::new(1, 0, -1), Default::default()).unwrap();
+    let _gate = scene.add_block(Block::ANDGate(VoxelPowered {
+        powered: false,
+    }), Coord::new(0, 0, l + 1), Default::default()).unwrap();
+
+    scene.save_debug_circuit(&Path::new("./result-initial.dot"));
+
+    for i in 1..=20u32 {
+        let _deltas = scene.simulate_tick();
+
+        scene.save_debug_circuit(&Path::new(&format!("./result-tick-{}.dot", i)));
+    }
+}
+
+#[ignore]
+#[test]
+pub fn scene_test_wire()
 {
     let mut scene = Scene::default();
 
