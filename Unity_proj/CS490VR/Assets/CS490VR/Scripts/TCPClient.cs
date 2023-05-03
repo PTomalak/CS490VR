@@ -52,8 +52,6 @@ public class TCPClient : MonoBehaviour
 
     public void Connect(string ip, int port)
     {
-        IP = ip;
-        PORT = port;
         if (!jp) return;
 
         try
@@ -78,7 +76,7 @@ public class TCPClient : MonoBehaviour
             }
             else
             {
-                socketConnection = new TcpClient(FALLBACK_IP, PORT);
+                socketConnection = new TcpClient(IP, PORT);
             }
         }
         catch (Exception e)
@@ -86,7 +84,7 @@ public class TCPClient : MonoBehaviour
             Debug.Log("CONNECTION: Trying Fallback IP");
             try
             {
-                socketConnection = new TcpClient(IP, PORT);
+                socketConnection = new TcpClient(FALLBACK_IP, PORT);
             }
             catch (Exception e2)
             {
@@ -167,11 +165,12 @@ public class TCPClient : MonoBehaviour
             if (stream.CanWrite)
             {
                 string clientMessage = request;
-                clientMessage += '\0';          // Null terminate client messages
+                clientMessage += "\0";          // Null terminate client messages
                 // Convert string message to byte array.                 
                 byte[] clientMessageAsByteArray = Encoding.ASCII.GetBytes(clientMessage);
                 // Write byte array to socketConnection stream.                 
                 stream.Write(clientMessageAsByteArray, 0, clientMessageAsByteArray.Length);
+                stream.Write(Encoding.ASCII.GetBytes("\0"), clientMessageAsByteArray.Length, 1);
             }
         }
         catch (SocketException socketException)
