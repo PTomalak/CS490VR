@@ -24,7 +24,9 @@ public class BlockPicker : MonoBehaviour
     {
         if (AButton.action.WasPressedThisFrame()) {
             PlaceBlock();
-            index = index + 1;
+            // Get the length of the list
+            int list_length = block_list.LIST.Count;
+            index = (index + 1) % list_length;
             block_name = block_list.LIST[index].block;
 
         }
