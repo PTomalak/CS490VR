@@ -18,8 +18,8 @@ public class TCPClient : MonoBehaviour
     private TcpClient socketConnection;
     private Thread clientReceiveThread;
 
-    int PORT = 10000;
-    string IP = "localhost";
+    int PORT = 39876;
+    string IP = "vr.ptomalak.com";
     #endregion
 
     ///// ADAPTED FROM BOILERPLATE TCP CLIENT CODE /////
