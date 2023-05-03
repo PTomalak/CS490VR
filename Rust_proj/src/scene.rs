@@ -3,7 +3,7 @@ use std::path::Path;
 use std::process::Command;
 use std::str::FromStr;
 
-use cgmath::{Array, Vector3};
+use cgmath::Array;
 use petgraph::dot::Dot;
 use petgraph::graph::NodeIndex;
 use petgraph::stable_graph::StableGraph;
@@ -66,6 +66,9 @@ impl From<SceneData> for Scene
 #[test]
 fn scene_serialize_test()
 {
+    #[allow(unused_imports)]
+    use cgmath::Vector3;
+
     let mut s = Scene::default();
     s.add_block(Block::ANDGate(VoxelPowered::default()), Vector3::unit_y(), Default::default()).unwrap();
 
@@ -675,6 +678,9 @@ impl Scene
 #[test]
 pub fn scene_solo_test()
 {
+    #[allow(unused_imports)]
+    use cgmath::Vector3;
+
     let mut scene = Scene::default();
 
     scene.add_block(Block::Wire(VoxelPowered::default()), Vector3::unit_y(), Default::default()).unwrap();
@@ -736,7 +742,7 @@ pub fn scene_wire_test()
         powered: false,
     }), Coord::new(-2, 2, 0), Default::default()).unwrap();
 
-    scene.save_debug_circuit(&Path::new("./result-initial.dot"));
+    scene.save_debug_circuit(&Path::new("./generated/result-initial.dot"));
 
     for i in 1..=20u32 {
         let deltas = scene.simulate_tick();
@@ -747,6 +753,6 @@ pub fn scene_wire_test()
             b.powered = i % 2 == 0;
         }
 
-        scene.save_debug_circuit(&Path::new(&format!("./result-tick-{}.dot", i)));
+        scene.save_debug_circuit(&Path::new(&format!("./generated/result-tick-{}.dot", i)));
     }
 }
