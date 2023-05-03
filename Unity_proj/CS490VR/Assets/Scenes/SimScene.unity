@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.59937435, g: 0.5997503, b: 0.5994877, a: 1}
+  m_IndirectSpecularColor: {r: 0.59937525, g: 0.5997512, b: 0.59948856, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -320,6 +320,10 @@ MonoBehaviour:
     m_Reference: {fileID: -6975466136225229750, guid: c348712bda248c246b8c49b3db54643f,
       type: 3}
   block_name: 
+  invRenderer: {fileID: 782628378}
+  buckRenderer: {fileID: 642178996}
+  invMesh: {fileID: 782628377}
+  buckMesh: {fileID: 642178995}
 --- !u!1 &67049632
 GameObject:
   m_ObjectHideFlags: 0
@@ -710,6 +714,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}
+--- !u!33 &642178995 stripped
+MeshFilter:
+  m_CorrespondingSourceObject: {fileID: 4096404015110827384, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 642178994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &642178996 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 726256945110301201, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 642178994}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -907,6 +923,18 @@ PrefabInstance:
 --- !u!1 &782628376 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 782628375}
+  m_PrefabAsset: {fileID: 0}
+--- !u!33 &782628377 stripped
+MeshFilter:
+  m_CorrespondingSourceObject: {fileID: 4096404015110827384, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 782628375}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &782628378 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 726256945110301201, guid: 42caebb0abf45034bbd9988774ddfdd1,
     type: 3}
   m_PrefabInstance: {fileID: 782628375}
   m_PrefabAsset: {fileID: 0}
@@ -1128,6 +1156,10 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 0}
   block_name: 
+  invRenderer: {fileID: 0}
+  buckRenderer: {fileID: 0}
+  invMesh: {fileID: 0}
+  buckMesh: {fileID: 0}
 --- !u!1 &1681192816
 GameObject:
   m_ObjectHideFlags: 0
