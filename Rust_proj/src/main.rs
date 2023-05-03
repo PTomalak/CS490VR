@@ -25,7 +25,7 @@ fn main() {
         .map(|e| Scene::load(&PathBuf::from(e)));
 
     // Launch server
-    let mut server = Network::new(&format!("127.0.0.1:{}", port));
+    let mut server = Network::new(&format!("192.168.118.230:{}", port));
     if let Some(w) = world_file {
         server.world = Arc::new(Mutex::new(w));
         info!("loaded world from file");
