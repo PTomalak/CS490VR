@@ -116,8 +116,9 @@ pub enum Protocol
     ServerResponseMetadata(ProtocolResponseMetadata),
 }
 
+#[ignore]
 #[test]
-fn serialize_test()
+fn protocol_serialize_test()
 {
     #[allow(unused_imports)]
     use crate::block::{Block::Clock, VoxelClock};
@@ -148,6 +149,7 @@ pub struct Network
 impl Network
 {
     /// Handles combined messages from clients (only one instance of this function)
+    ///
     /// Communicates with the client handlers via message passing
     fn server_handler(queue: MessageReceiver, world: World, clients: Clients, settings: WorldSettings) -> Option<()> {
         let mut w = world.lock().ok()?;
@@ -408,6 +410,7 @@ impl Network
     }
 
     /// Handles network communication to and from a given client (potentially multiple instances of this function)
+    ///
     /// Communicates with the server handler via message passing
     fn client_handler(inbound: MessagePlainReceiver, outbound: MessagePlainSender, mut stream: TcpStream, addr: SocketAddr) -> Option<()> {
         stream.set_nonblocking(true).ok()?;

@@ -1,4 +1,6 @@
+use std::collections::HashMap;
 use std::hash::Hash;
+use std::str::FromStr;
 
 use bimap::{BiHashMap, Overwritten};
 use cgmath::Vector3;
@@ -9,6 +11,41 @@ pub type Coord = Vector3<i32>;
 pub trait Value: Hash + Eq + Default + Clone {}
 
 impl<T: Hash + Eq + Default + Clone> Value for T {}
+
+/// Grid data storage type for serialization/deserialization
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct GridData<T: Value>
+{
+    voxels: HashMap<String, T>,
+}
+
+impl<T: Value> From<Grid<T>> for GridData<T>
+{
+    fn from(value: Grid<T>) -> Self {
+        Self {
+            voxels: value.voxels
+                .iter()
+                .map(|(left, right)|
+                    (format!("{},{},{}", left.x, left.y, left.z), right.clone()))
+                .collect(),
+        }
+    }
+}
+
+impl<T: Value> From<GridData<T>> for Grid<T>
+{
+    fn from(value: GridData<T>) -> Self {
+        Self {
+            voxels: value.voxels
+                .into_iter()
+                .map(|(k, v)| {
+                    let e = k.split(",").map(|e| i32::from_str(e).unwrap()).collect::<Vec<i32>>();
+                    (Coord::new(e[0], e[1], e[2]), v)
+                })
+                .collect(),
+        }
+    }
+}
 
 /// Stores a voxel grid
 ///

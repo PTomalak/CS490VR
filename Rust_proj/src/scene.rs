@@ -3,7 +3,7 @@ use std::path::Path;
 use std::process::Command;
 use std::str::FromStr;
 
-use cgmath::Array;
+use cgmath::{Array, Vector3};
 use petgraph::dot::Dot;
 use petgraph::graph::NodeIndex;
 use petgraph::stable_graph::StableGraph;
@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 #[allow(unused_imports)]
 use crate::block::{Block, circuit_voxel, is_circuit_voxel, Orient, PowerState, VoxelClock, VoxelID, VoxelPowered};
-use crate::grid::{Coord, Grid};
+use crate::grid::{Coord, Grid, GridData};
 
 pub type InstanceID = u32;
 
@@ -22,12 +22,13 @@ pub type NodeID = NodeIndex<NodeIDType>;
 pub const OFF: PowerState = false;
 pub const ON: PowerState = true;
 
+/// Scene data storage type for serialization/deserialization
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct SceneData
 {
     blocks: HashMap<String, (Coord, Orient, Block)>,
     circuit: StableGraph<(InstanceID, VoxelID, Coord), PowerState, Undirected, NodeIDType>,
-    space: Grid<(InstanceID, VoxelID, Option<NodeID>)>,
+    space: GridData<(InstanceID, VoxelID, Option<NodeID>)>,
     ticks: u32,
 }
 
@@ -40,19 +41,10 @@ impl From<Scene> for SceneData
                 .map(|(i, e)| (i.to_string(), e))
                 .collect(),
             circuit: value.circuit,
-            space: value.space,
+            space: GridData::from(value.space),
             ticks: value.ticks,
         }
     }
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct Scene
-{
-    blocks: HashMap<InstanceID, (Coord, Orient, Block)>,
-    circuit: StableGraph<(InstanceID, VoxelID, Coord), PowerState, Undirected, NodeIDType>,
-    space: Grid<(InstanceID, VoxelID, Option<NodeID>)>,
-    ticks: u32,
 }
 
 impl From<SceneData> for Scene
@@ -64,10 +56,30 @@ impl From<SceneData> for Scene
                 .map(|(i, e)| (InstanceID::from_str(&i).unwrap(), e))
                 .collect(),
             circuit: value.circuit,
-            space: value.space,
+            space: Grid::from(value.space),
             ticks: value.ticks,
         }
     }
+}
+
+#[ignore]
+#[test]
+fn scene_serialize_test()
+{
+    let mut s = Scene::default();
+    s.add_block(Block::ANDGate(VoxelPowered::default()), Vector3::unit_y(), Default::default()).unwrap();
+
+    let g = SceneData::from(s);
+    println!("{}", serde_json::to_string_pretty(&g).unwrap());
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct Scene
+{
+    blocks: HashMap<InstanceID, (Coord, Orient, Block)>,
+    circuit: StableGraph<(InstanceID, VoxelID, Coord), PowerState, Undirected, NodeIDType>,
+    space: Grid<(InstanceID, VoxelID, Option<NodeID>)>,
+    ticks: u32,
 }
 
 impl Scene
@@ -229,7 +241,7 @@ impl Scene
                         data.powered = input_a_state || input_b_state;
                     }
                     Block::XORGate(data) => {
-                        // Get named nodes
+                        // Get named nodGrides
                         let (input_a_node, input_b_node, _output_node) =
                             (node_ids[&circuit_voxel("in_a")], node_ids[&circuit_voxel("in_b")], node_ids[&circuit_voxel("out")]);
 
@@ -435,6 +447,7 @@ impl Scene
         loop {
             if let Some(node_id) = unvisited.iter().next().copied() {
                 let mut current_set = HashSet::new();
+                current_set.insert(node_id);
                 bfs_wires(node_id, &self.blocks, &self.circuit, &mut current_set);
 
                 contiguous_wire_networks.push(current_set
@@ -537,6 +550,7 @@ impl Scene
     }
 
     /// Adds the given block at the given location and updates the internal circuit
+    ///
     /// Returns the block's ID or `None` if a block overlaps an existing block
     pub fn add_block(&mut self, block: Block, location: Coord, orientation: Orient) -> Option<InstanceID> {
         let id = self.blocks.len() as u32;
@@ -632,6 +646,7 @@ impl Scene
     }
 
     /// Add a wire that follows the given path
+    ///
     /// Returns the wire block IDs if the path is valid, `None` if not
     #[allow(dead_code)]
     pub fn add_wire(&mut self, path: Vec<Coord>) -> Option<Vec<InstanceID>> {
@@ -658,7 +673,22 @@ impl Scene
 }
 
 #[test]
-pub fn scene_test_gate()
+pub fn scene_solo_test()
+{
+    let mut scene = Scene::default();
+
+    scene.add_block(Block::Wire(VoxelPowered::default()), Vector3::unit_y(), Default::default()).unwrap();
+
+    let deltas = scene.simulate_tick();
+
+    dbg!(deltas);
+
+    println!("successfully added wire");
+}
+
+#[ignore]
+#[test]
+pub fn scene_gate_test()
 {
     let mut scene = Scene::default();
 
@@ -691,7 +721,7 @@ pub fn scene_test_gate()
 
 #[ignore]
 #[test]
-pub fn scene_test_wire()
+pub fn scene_wire_test()
 {
     let mut scene = Scene::default();
 

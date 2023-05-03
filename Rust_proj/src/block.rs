@@ -8,7 +8,7 @@ use crate::grid::Coord;
 
 pub type VoxelID = String;
 pub type PowerState = bool;
-pub type Color = (u8, u8, u8, u8);
+pub type _Color = (u8, u8, u8, u8);
 
 const VOXEL_CIRCUIT: &str = "!";
 
@@ -75,9 +75,7 @@ pub struct VoxelPixel
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelBlock
-{
-    pub color: Color,
-}
+{}
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelClock
