@@ -10,6 +10,7 @@ public class BlockPicker : MonoBehaviour
     public BlockDictionary block_list;
     public GameObject prefab;
     public InputActionProperty AButton;
+    public InputActionProperty BButton;
     public string block_name;
 
     public MeshRenderer invRenderer;
@@ -29,19 +30,27 @@ public class BlockPicker : MonoBehaviour
     void Update()
     {
         if (AButton.action.WasPressedThisFrame()) {
-            PlaceBlock();
             // Get the length of the list
             int list_length = block_list.LIST.Count;
             index = (index + 1) % list_length;
             block_name = block_list.LIST[index].block;
-
-            Material newTexture = block_list.LIST[index].prefab.GetComponent<MeshRenderer>().material;
-            Mesh newMesh = block_list.LIST[index].prefab.GetComponent<MeshFilter>().mesh;
-            invRenderer.material = newTexture;
-            buckRenderer.material = newTexture;
-            invMesh.mesh = newMesh;
-            buckMesh.mesh = newMesh;
+        } else if (BButton.action.WasPressedThisFrame())
+        {
+            // Decrement the length of the list
+            int list_length = block_list.LIST.Count;
+            index = (index - 1 + list_length) % list_length;
+            block_name = block_list.LIST[index].block;
         }
+    }
+
+    public void UpdateHeld()
+    {
+        Material newTexture = block_list.LIST[index].prefab.GetComponent<MeshRenderer>().material;
+        Mesh newMesh = block_list.LIST[index].prefab.GetComponent<MeshFilter>().mesh;
+        invRenderer.material = newTexture;
+        buckRenderer.material = newTexture;
+        invMesh.mesh = newMesh;
+        buckMesh.mesh = newMesh;
     }
 
 
