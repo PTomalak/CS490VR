@@ -1,6 +1,6 @@
 # VR Circuit Simulator
 
-Made by (alphabetically) Patrick Tomalak, Rohan Ashok, and Tom Yarrow for CS-49000VR at Purdue University, Spring 2023.
+Made by (alphabetically) Patryk Tomalak, Rohan Ashok, and Tom Yarrow for CS-49000VR at Purdue University, Spring 2023.
 
 # Technology
 
