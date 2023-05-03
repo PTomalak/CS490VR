@@ -34,7 +34,7 @@ public class DioRotateInteract : AltInteractable
 
         string current_rot = loader.GetData().rotation;
         int index = STATES.IndexOf(current_rot);
-        int new_index = index + amount % STATES.Count;
+        int new_index = (index + amount + STATES.Count) % STATES.Count;
         bm.jp.SendUpdateRequest(new { id = loader.data.id, rotation = STATES[new_index] });
     }
 }

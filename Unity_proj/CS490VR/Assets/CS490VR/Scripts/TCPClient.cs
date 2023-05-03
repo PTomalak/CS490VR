@@ -37,7 +37,7 @@ public class TCPClient : MonoBehaviour
     {
         if (socketConnection != null && !connected)
         {
-            pm.InitializePlayer(DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
+            pm.InitializePlayer(DateTime.Now.Second.ToString()+"."+DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
             connected = true;
         }
     }
@@ -78,7 +78,7 @@ public class TCPClient : MonoBehaviour
             }
             else
             {
-                socketConnection = new TcpClient(IP, PORT);
+                socketConnection = new TcpClient(FALLBACK_IP, PORT);
             }
         }
         catch (Exception e)
@@ -86,7 +86,7 @@ public class TCPClient : MonoBehaviour
             Debug.Log("CONNECTION: Trying Fallback IP");
             try
             {
-                socketConnection = new TcpClient(FALLBACK_IP, PORT);
+                socketConnection = new TcpClient(IP, PORT);
             }
             catch (Exception e2)
             {
