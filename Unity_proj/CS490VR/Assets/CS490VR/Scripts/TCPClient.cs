@@ -17,9 +17,11 @@ public class TCPClient : MonoBehaviour
     #region fields
     private TcpClient socketConnection;
     private Thread clientReceiveThread;
+    bool connected = false;
 
     int PORT = 39876;
     string IP = "vr.ptomalak.com";
+    string FALLBACK_IP = "192.168.118.230";
     #endregion
 
     ///// ADAPTED FROM BOILERPLATE TCP CLIENT CODE /////
@@ -29,6 +31,15 @@ public class TCPClient : MonoBehaviour
     {
         jp = GetComponent<JSONParser>();
         Connect(IP, PORT);
+    }
+
+    private void Update()
+    {
+        if (socketConnection != null && !connected)
+        {
+            pm.InitializePlayer(DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
+            connected = true;
+        }
     }
 
     private void OnDestroy()
@@ -47,15 +58,13 @@ public class TCPClient : MonoBehaviour
 
         try
         {
-            socketConnection = new TcpClient(IP, PORT);
             clientReceiveThread = new Thread(new ThreadStart(ListenForData));
             clientReceiveThread.IsBackground = true;
             clientReceiveThread.Start();
-            pm.InitializePlayer(DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
         }
         catch (Exception e)
         {
-            Debug.Log("On client connect exception " + e);
+            Debug.Log("CONNECTION ERR: " + e);
         }
     }
 
@@ -63,6 +72,16 @@ public class TCPClient : MonoBehaviour
     {
         try
         {
+            try
+            {
+                socketConnection = new TcpClient(IP, PORT);
+            }
+            catch (SocketException e)
+            {
+                socketConnection = new TcpClient(FALLBACK_IP, PORT);
+                Debug.Log("CONNECTION: Trying Fallback IP");
+            }
+
             Byte[] bytes = new Byte[1024];
             while (true)
             {
@@ -116,13 +135,13 @@ public class TCPClient : MonoBehaviour
         }
         catch (SocketException socketException)
         {
-            Debug.Log("Socket Listen exception: " + socketException);
+            Debug.Log("CONNECTION ERR: " + socketException);
         }
     }
 
     public void SendJson(string request)
     {
-        Debug.Log("SEND: " + request);
+        //Debug.Log("SEND: " + request);
 
         if (socketConnection == null)
         {
