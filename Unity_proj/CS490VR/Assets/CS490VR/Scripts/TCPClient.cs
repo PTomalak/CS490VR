@@ -22,7 +22,9 @@ public class TCPClient : MonoBehaviour
     int PORT = 39876;
     // 192.168.118.230
     string IP = "vr.ptomalak.com";
+    //string IP = "192.168.118.230";
     string FALLBACK_IP = "vr.ptomalak.com";
+    //string FALLBACK_IP = "192.168.118.230";
     #endregion
 
     ///// ADAPTED FROM BOILERPLATE TCP CLIENT CODE /////
@@ -166,7 +168,7 @@ public class TCPClient : MonoBehaviour
             if (stream.CanWrite)
             {
                 string clientMessage = request;
-                clientMessage += "\0";          // Null terminate client messages
+                clientMessage += "\x01";          // terminate client messages
                 // Convert string message to byte array.                 
                 byte[] clientMessageAsByteArray = Encoding.ASCII.GetBytes(clientMessage);
                 // Write byte array to socketConnection stream.
