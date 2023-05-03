@@ -1090,7 +1090,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tc: {fileID: 1772401868}
-  playerPrefab: {fileID: 0}
+  jp: {fileID: 1772401869}
+  playerPrefab: {fileID: 7043017995275549949, guid: cd43e1e85461329419f1df6d79dc63a2,
+    type: 3}
   myName: 
   myPosition: {x: 0, y: 0, z: 0}
   myRotation: {x: 0, y: 0, z: 0}
@@ -1162,6 +1164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e78b554fb62afe43b54e20e1015d5ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  jp: {fileID: 0}
   wm: {fileID: 1245193298489477792}
   block_dict: {fileID: 11400000, guid: d06ff6ccdadd40147b1a4a02294bad80, type: 2}
   tick: 0

@@ -32,6 +32,8 @@ public class BlockManager : MonoBehaviour
         string blockJson = JsonConvert.SerializeObject(data);
         BlockData basicData = JsonConvert.DeserializeObject<BlockData>(blockJson);
 
+        Debug.Log("PLACE: " + blockJson);
+
         // Check if our dictionary already contains the block (or wire)
         // and remove that block (or wire)
         int id = basicData.id;
@@ -131,8 +133,8 @@ public class BlockManager : MonoBehaviour
         }
 
         // Check if we have that block in our system
+        if (!blocks.ContainsKey(basicData.id)) return new BMResponse(false, "Block id "+basicData.id+" Not Found");
         GameObject target = blocks[basicData.id];
-        if (!target) return new BMResponse(false, "Block Not Found");
 
         // Unload and reload the block loader
         IDataLoader bl = target.GetComponent<IDataLoader>();
@@ -303,20 +305,24 @@ public class BlockManager : MonoBehaviour
     // Block test waits a few seconds for the server to activate, then places/edits several blocks
     IEnumerator BlockTest()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
 
         //ClientRemoveBlock(100);
 
         // Place several blocks
+        yield return new WaitForSeconds(0.05f);
         ClientPlaceBlock("toggle", 0, 0, 0);
         ClientPlaceBlock("clock", 2, 0, 0);
-        ClientPlaceBlock("wire", 0, 0, 1);
-        ClientPlaceBlock("wire", 2, 0, 1);
+        yield return new WaitForSeconds(0.05f);
+        //ClientPlaceBlock("wire", 0, 0, 1);
+        //ClientPlaceBlock("wire", 2, 0, 1);
+        yield return new WaitForSeconds(0.05f);
         ClientPlaceBlock("and_gate", 1, 0, 3);
-        ClientPlaceBlock("wire", 1, 0, 5);
+        //ClientPlaceBlock("wire", 1, 0, 5);
+        yield return new WaitForSeconds(0.05f);
         ClientPlaceBlock("pixel", 1, 0, 6);
 
-        yield return new WaitForSeconds(0.05f);
-        ClientUpdateBlock(140, new { powered = true });
+        yield return new WaitForSeconds(2.5f);
+        ClientUpdateBlock(0, new { data = new { data = new { powered = true } } });
     }
 }

@@ -7,6 +7,7 @@ public class PlayerManager : MonoBehaviour
 {
     #region FILL IN EDITOR
     public TCPClient tc;
+    public JSONParser jp;
     public GameObject playerPrefab;
     #endregion
 
@@ -14,12 +15,13 @@ public class PlayerManager : MonoBehaviour
     public string myName = "";
     public Vector3 myPosition;
     public Vector3 myRotation;
-    public Dictionary<string, GameObject> playerList;
+    public Dictionary<string, GameObject> playerList = new Dictionary<string, GameObject>();
 
     // Data to handle sending the position/rotation updates
     float SEND_FREQUENCY = 0.05f;
     float prev_send_time;
 
+    [System.Serializable]
     public class PlayerData
     {
         public string name;
@@ -86,7 +88,7 @@ public class PlayerManager : MonoBehaviour
         myName = name;
         myPosition = pos;
         myRotation = rot;
-        tc.SendJson(JsonUtility.ToJson(new PlayerData(myName, myPosition, myRotation)));
+        jp.SendJoinRequest(new PlayerData(myName, myPosition, myRotation));
     }
 
     private void Awake()

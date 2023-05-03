@@ -19,9 +19,9 @@ public class JSONParser : MonoBehaviour
     }
     public class PlaceUpdateAction : Action
     {
-        public BlockData[] data;
+        public object[] data;
 
-        public PlaceUpdateAction(string action, BlockData[] data)
+        public PlaceUpdateAction(string action, object[] data)
         {
             this.action = action;
             this.data = data;
@@ -46,6 +46,7 @@ public class JSONParser : MonoBehaviour
             this.data = data;
         }
     }
+    [System.Serializable]
     public class ServerAction : Action
     {
         public ServerData data;
@@ -53,6 +54,27 @@ public class JSONParser : MonoBehaviour
         {
             this.action = "ServerResponseMetadata";
             this.data.clients = data;
+        }
+    }
+    [System.Serializable]
+    public class JoinAction : Action
+    {
+        public PlayerManager.PlayerData data;
+
+        public JoinAction(PlayerManager.PlayerData data)
+        {
+            this.action = "ClientRequestJoin";
+            this.data = data;
+        }
+    }
+    public class ResponseAction : Action
+    {
+        public BMResponse data;
+
+        public ResponseAction(BMResponse data)
+        {
+            this.action = "BothResponse";
+            this.data = data;
         }
     }
 
@@ -65,6 +87,7 @@ public class JSONParser : MonoBehaviour
             id = i;
         }
     }
+    [System.Serializable]
     public class ServerData
     {
         public int ticks = 0;
@@ -127,7 +150,7 @@ public class JSONParser : MonoBehaviour
                     foreach (object data in act.data)
                     {
                         BMResponse resp = bm.PlaceBlock(data);
-                        tc.SendJson(JsonUtility.ToJson(resp));
+                        tc.SendJson(JsonUtility.ToJson(new ResponseAction(resp)));
                     }
                 }
                 break;
@@ -137,7 +160,7 @@ public class JSONParser : MonoBehaviour
                     foreach (RemoveData data in act.data)
                     {
                         BMResponse resp = bm.RemoveBlock(data);
-                        tc.SendJson(JsonUtility.ToJson(resp));
+                        tc.SendJson(JsonUtility.ToJson(new ResponseAction(resp)));
                     }
                 }
                 break;
@@ -147,20 +170,21 @@ public class JSONParser : MonoBehaviour
                     foreach (object data in act.data)
                     {
                         BMResponse resp = bm.UpdateBlock(data);
-                        tc.SendJson(JsonUtility.ToJson(resp));
+
+                        tc.SendJson(JsonUtility.ToJson(new ResponseAction(resp)));
                     }
                 }
                 break;
             case "ServerResponseMetadata":
                 {
-                    ServerAction act = JsonConvert.DeserializeObject<ServerAction>(json);
+                    ServerAction act = JsonUtility.FromJson<ServerAction>(json);
                     bm.tick = act.data.ticks;
                     pm.UpdatePlayerList(act.data.clients);
                     break;
                 }
             default:
                 BMResponse res = new BMResponse(false, "Invalid Action");
-                //tc.SendJson(JsonUtility.ToJson(res));
+                //tc.SendJson(JsonUtility.ToJson(new ResponseAction(res)));
                 break;
         }
     }
@@ -186,6 +210,11 @@ public class JSONParser : MonoBehaviour
     public void SendUpdateRequest(object data)
     {
         tc.SendJson(JsonConvert.SerializeObject(new UpdateAction(data)));
+    }
+
+    public void SendJoinRequest(PlayerManager.PlayerData data)
+    {
+        tc.SendJson(JsonUtility.ToJson(new JoinAction(data)));
     }
 
     // Convert local request into JSON and send request

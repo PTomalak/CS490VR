@@ -29,13 +29,6 @@ public class TCPClient : MonoBehaviour
     {
         jp = GetComponent<JSONParser>();
         Connect(IP, PORT);
-        StartCoroutine(SendInitialConnection());
-    }
-
-    IEnumerator SendInitialConnection()
-    {
-        yield return new WaitForSeconds(1.5f);
-        pm.InitializePlayer(DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
     }
 
     private void OnDestroy()
@@ -54,9 +47,11 @@ public class TCPClient : MonoBehaviour
 
         try
         {
+            socketConnection = new TcpClient(IP, PORT);
             clientReceiveThread = new Thread(new ThreadStart(ListenForData));
             clientReceiveThread.IsBackground = true;
             clientReceiveThread.Start();
+            pm.InitializePlayer(DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
         }
         catch (Exception e)
         {
@@ -68,7 +63,6 @@ public class TCPClient : MonoBehaviour
     {
         try
         {
-            socketConnection = new TcpClient(IP, PORT);
             Byte[] bytes = new Byte[1024];
             while (true)
             {
@@ -98,7 +92,7 @@ public class TCPClient : MonoBehaviour
                             compiledJson = compiledJson[(index + 1)..];
 
                             // Receive action
-                            Debug.Log("RECEIVE(A): " + json);
+                            //Debug.Log("RECEIVE(A): " + json);
                             jp.incomingActions.Enqueue(json);
 
                             index = compiledJson.IndexOf("}{");
@@ -111,7 +105,7 @@ public class TCPClient : MonoBehaviour
                         if (opening == closing)
                         {
                             // Receive action
-                            Debug.Log("RECEIVE(B): " + compiledJson);
+                            //Debug.Log("RECEIVE(B): " + compiledJson);
                             jp.incomingActions.Enqueue(compiledJson);
 
                             compiledJson = "";
