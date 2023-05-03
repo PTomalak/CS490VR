@@ -477,7 +477,10 @@ impl Network
                     // Add to message queue
                     outbound.send((addr.to_string(), cl_to_sv_message)).ok()?;
                 } else {
-                    warn!("client {} sent bad data: \"{}\"", addr, String::from_utf8(buffer.clone()).unwrap());
+                    // warn!("client {} sent bad data: \"{}\"", addr, String::from_utf8(buffer.clone()).unwrap());
+
+                    let num_zeros = buffer.iter().filter(|e| **e == 0).count();
+                    warn!("client {} sent bad data with {} zero(s)", addr, num_zeros);
 
                     // Reset buffer
                     buffer.fill(1);
