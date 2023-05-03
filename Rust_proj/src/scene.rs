@@ -562,8 +562,6 @@ impl Scene
 
     /// Add block with custom ID (internal use only)
     fn add_block_with_id(&mut self, id: InstanceID, block: Block, location: Coord, orientation: Orient) -> Option<InstanceID> {
-        assert!(self.blocks.insert(id, (location, orientation, block.clone())).is_none());
-
         // Check if block overlaps existing block
 
         for (_, voxel_location) in block.get_global_structure(location, orientation) {
@@ -571,6 +569,10 @@ impl Scene
                 return None;
             }
         }
+
+        // Add block
+
+        assert!(self.blocks.insert(id, (location, orientation, block.clone())).is_none());
 
         // Add block connections and voxels
 
