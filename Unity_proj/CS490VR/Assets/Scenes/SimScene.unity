@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.59937435, g: 0.5997503, b: 0.5994877, a: 1}
+  m_IndirectSpecularColor: {r: 0.59937525, g: 0.5997512, b: 0.59948856, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -320,6 +320,10 @@ MonoBehaviour:
     m_Reference: {fileID: -6975466136225229750, guid: c348712bda248c246b8c49b3db54643f,
       type: 3}
   block_name: 
+  invRenderer: {fileID: 782628388}
+  buckRenderer: {fileID: 1768069890}
+  invMesh: {fileID: 782628389}
+  buckMesh: {fileID: 1768069891}
 --- !u!1 &67518915
 GameObject:
   m_ObjectHideFlags: 0
@@ -1001,6 +1005,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!23 &782628388 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 726256945110301201, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 782628375}
+  m_PrefabAsset: {fileID: 0}
+--- !u!33 &782628389 stripped
+MeshFilter:
+  m_CorrespondingSourceObject: {fileID: 4096404015110827384, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 782628375}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1076467005 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3346848184371273572, guid: 4e660da2419d1614198b2c073ddf863d,
@@ -1056,6 +1072,10 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 0}
   block_name: 
+  invRenderer: {fileID: 0}
+  buckRenderer: {fileID: 0}
+  invMesh: {fileID: 0}
+  buckMesh: {fileID: 0}
 --- !u!1 &1681192816
 GameObject:
   m_ObjectHideFlags: 0
@@ -1154,13 +1174,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layermask:
     serializedVersion: 2
-    m_Bits: 2147483647
+    m_Bits: 128
   blockManager: {fileID: 1772401867}
   block_list: {fileID: 0}
   prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}
 --- !u!1 &1768069886 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 642178994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1768069890 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 726256945110301201, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 642178994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!33 &1768069891 stripped
+MeshFilter:
+  m_CorrespondingSourceObject: {fileID: 4096404015110827384, guid: 42caebb0abf45034bbd9988774ddfdd1,
     type: 3}
   m_PrefabInstance: {fileID: 642178994}
   m_PrefabAsset: {fileID: 0}
