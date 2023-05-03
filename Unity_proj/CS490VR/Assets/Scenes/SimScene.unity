@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.59937525, g: 0.5997512, b: 0.59948856, a: 1}
+  m_IndirectSpecularColor: {r: 0.59937435, g: 0.5997503, b: 0.5994877, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -320,7 +320,7 @@ MonoBehaviour:
     m_Reference: {fileID: -6975466136225229750, guid: c348712bda248c246b8c49b3db54643f,
       type: 3}
   BButton:
-    m_UseReference: 0
+    m_UseReference: 1
     m_Action:
       m_Name: B Button
       m_Type: 0
@@ -330,7 +330,7 @@ MonoBehaviour:
       m_Interactions: 
       m_SingletonActionBindings: []
       m_Flags: 0
-    m_Reference: {fileID: -6975466136225229750, guid: c348712bda248c246b8c49b3db54643f,
+    m_Reference: {fileID: -1554015327701511941, guid: c348712bda248c246b8c49b3db54643f,
       type: 3}
   block_name: 
   invRenderer: {fileID: 782628378}
