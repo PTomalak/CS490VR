@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7604888017128775920}
   - component: {fileID: 7858432930528556855}
   - component: {fileID: -1199654273777535081}
+  - component: {fileID: -3954163098081933351}
   m_Layer: 7
   m_Name: Pulse
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: pulse
   powerableTextures: {fileID: 11400000, guid: 34b4abf60ded2aa449f062775c130c04, type: 2}
+--- !u!114 &-3954163098081933351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3633732729333439380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5291c188023de4498c1959ceec757cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  pl: {fileID: 0}

@@ -38,6 +38,18 @@ public class RemoveHelper : MonoBehaviour
         //newBlock.transform.localScale = Vector3.one * 0.05f;
         //Destroy(newBlock, 1f);
 
+        if (nearest.transform.gameObject.name == "Wire Controller")
+        {
+            Vector3 v = hit[0].point;
+            int id_wire = blockManager.GetWireAtGlobalPosition(v.x, v.y, v.z);
+            if (id_wire != 0)
+            {
+                // this is a wire
+                blockManager.ClientRemoveBlock(id_wire);
+                return;
+            }
+        }
+
         // Attempt to get the block ID from the hit game object
         IDataLoader dl = nearest.transform.GetComponent<IDataLoader>();
         if (dl != null)
