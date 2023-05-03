@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7213749521341952751}
   - component: {fileID: 6961259622641181992}
   - component: {fileID: 6771663027367253436}
+  - component: {fileID: 2050809352581416396}
   m_Layer: 7
   m_Name: Pulse Latch
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: pulse_latch
   powerableTextures: {fileID: 11400000, guid: b9ca3953bb95a2849bb4faf99951927e, type: 2}
+--- !u!114 &2050809352581416396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4609437560015391115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db5d46bbd26765e438e8661a130c11f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  loader: {fileID: 0}

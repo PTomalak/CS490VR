@@ -9,6 +9,7 @@ public class PlayerManager : MonoBehaviour
     public TCPClient tc;
     public JSONParser jp;
     public GameObject playerPrefab;
+    public Transform playerTracker;
     #endregion
 
     // Data to track player position/rotation
@@ -101,7 +102,8 @@ public class PlayerManager : MonoBehaviour
     {
         if (myName != "" && prev_send_time+SEND_FREQUENCY < Time.time)
         {
-            //tc.SendJson(JsonUtility.ToJson(new PlayerData(myName, myPosition, myRotation)));
+            UpdatePositionRotation(playerTracker.position, playerTracker.rotation.eulerAngles);
+            jp.SendJoinRequest(new PlayerData(myName, myPosition, myRotation));
             prev_send_time = Time.time;
         }
     }

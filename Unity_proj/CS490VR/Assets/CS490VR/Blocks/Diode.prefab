@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 734370163756114929}
   - component: {fileID: 1060104595417805878}
   - component: {fileID: 2995510433870160369}
+  - component: {fileID: -6794058532798970674}
   m_Layer: 7
   m_Name: Diode
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: diode
   powerableTextures: {fileID: 11400000, guid: 5c7c1b21884669e43899ab7d73e1e2ad, type: 2}
+--- !u!114 &-6794058532798970674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5896725064193185941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db5d46bbd26765e438e8661a130c11f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  loader: {fileID: 0}

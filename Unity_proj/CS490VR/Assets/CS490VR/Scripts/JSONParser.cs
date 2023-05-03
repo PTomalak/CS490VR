@@ -149,6 +149,7 @@ public class JSONParser : MonoBehaviour
                     PlaceUpdateAction act = JsonConvert.DeserializeObject<PlaceUpdateAction>(json);
                     foreach (object data in act.data)
                     {
+                        //Debug.Log("PLACE: " + json);
                         BMResponse resp = bm.PlaceBlock(data);
                         tc.SendJson(JsonUtility.ToJson(new ResponseAction(resp)));
                     }
@@ -159,6 +160,7 @@ public class JSONParser : MonoBehaviour
                     RemoveAction act = JsonConvert.DeserializeObject<RemoveAction>(json);
                     foreach (RemoveData data in act.data)
                     {
+                        //Debug.Log("REMOVE: " + json);
                         BMResponse resp = bm.RemoveBlock(data);
                         tc.SendJson(JsonUtility.ToJson(new ResponseAction(resp)));
                     }
@@ -169,6 +171,7 @@ public class JSONParser : MonoBehaviour
                     PlaceUpdateAction act = JsonConvert.DeserializeObject<PlaceUpdateAction>(json);
                     foreach (object data in act.data)
                     {
+                        //Debug.Log("UPDATE: " + json);
                         BMResponse resp = bm.UpdateBlock(data);
 
                         tc.SendJson(JsonUtility.ToJson(new ResponseAction(resp)));

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6199000945438947329}
   - component: {fileID: 5944884284925276102}
   - component: {fileID: 7273865941773357128}
+  - component: {fileID: -4481353649307100667}
   m_Layer: 7
   m_Name: OR Gate
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: or_gate
   powerableTextures: {fileID: 11400000, guid: caeca8478f22879419ebd217894d079e, type: 2}
+--- !u!114 &-4481353649307100667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000686929664426853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfcdec576190d5c439101a65cc1fb59a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  loader: {fileID: 0}
