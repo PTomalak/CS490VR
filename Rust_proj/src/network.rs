@@ -202,7 +202,8 @@ impl Network
                 let now = Instant::now();
                 let updates = w.simulate_tick();
                 last_tick = Instant::now();
-                info!("simulated tick in ~{}ms (versus {}ms maximum)", now.elapsed().as_millis(), settings.tick_duration.as_millis());
+
+                // info!("simulated tick in ~{}ms (versus {}ms maximum)", now.elapsed().as_millis(), settings.tick_duration.as_millis());
 
                 // Send client data to all clients
                 let response = (SERVER_ID.to_string(), Protocol::ServerResponseMetadata(ProtocolResponseMetadata {
