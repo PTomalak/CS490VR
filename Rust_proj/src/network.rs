@@ -375,7 +375,10 @@ impl Network
                         }
                     }
                     Protocol::ClientRequestJoin(data) => {
-                        info!("client {} has name {}", client_id, data.name);
+                        if clients.lock().ok()?.get_mut(&client_id).unwrap().0.is_none() {
+                            info!("client {} has name {}", client_id, data.name);
+                        }
+
                         clients.lock().ok()?.get_mut(&client_id).unwrap().0 = Some(data.clone());
 
                         // Send world state as of this tick
@@ -472,7 +475,7 @@ impl Network
                     // Add to message queue
                     outbound.send((addr.to_string(), cl_to_sv_message)).ok()?;
                 } else {
-                    error!("client {} sent bad data", addr);
+                    error!("client {} sent bad data: {}", addr, String::from_utf8(buffer).unwrap());
                     break;
                 }
             }
