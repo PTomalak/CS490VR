@@ -648,6 +648,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "BlockAltInteract",
+                    "type": "Button",
+                    "id": "a4dd9a49-28e9-4063-b506-739411c66566",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -791,6 +800,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "BlockInteract",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e689c285-2cb9-4980-bdf6-c1c5e531fc88",
+                    "path": "<XRController>{LeftHand}/secondaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "BlockAltInteract",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
