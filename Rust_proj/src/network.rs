@@ -477,8 +477,11 @@ impl Network
                     // Add to message queue
                     outbound.send((addr.to_string(), cl_to_sv_message)).ok()?;
                 } else {
-                    error!("client {} sent bad data: \"{}\"", addr, String::from_utf8(buffer).unwrap());
-                    break;
+                    warn!("client {} sent bad data: \"{}\"", addr, String::from_utf8(buffer).unwrap());
+
+                    // Reset buffer
+                    buffer.fill(1);
+                    current = 0;
                 }
             }
         }
