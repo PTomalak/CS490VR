@@ -74,12 +74,18 @@ public class TCPClient : MonoBehaviour
         {
             try
             {
-                socketConnection = new TcpClient(IP, PORT);
+                if (Application.isEditor)
+                {
+                    socketConnection = new TcpClient("localhost", PORT);
+                } else
+                {
+                    socketConnection = new TcpClient(IP, PORT);
+                }
             }
             catch (SocketException e)
             {
-                socketConnection = new TcpClient(FALLBACK_IP, PORT);
                 Debug.Log("CONNECTION: Trying Fallback IP");
+                socketConnection = new TcpClient(FALLBACK_IP, PORT);
             }
 
             Byte[] bytes = new Byte[1024];
@@ -141,7 +147,7 @@ public class TCPClient : MonoBehaviour
 
     public void SendJson(string request)
     {
-        //Debug.Log("SEND: " + request);
+        Debug.Log("SEND: " + request);
 
         if (socketConnection == null)
         {

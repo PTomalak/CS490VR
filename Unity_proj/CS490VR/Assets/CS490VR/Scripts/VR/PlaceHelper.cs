@@ -18,6 +18,5 @@ public class PlaceHelper : MonoBehaviour
         GameObject newBlock = Instantiate(prefab, blockPosition, Quaternion.identity);
         newBlock.transform.localScale = Vector3.one * 0.05f;
         Destroy(newBlock, 1f);
-
     }
 }

@@ -169,12 +169,12 @@ impl Network
             let should_quit = end_rx.try_recv().is_ok();
 
             // Check if a save needs to be performed
-            // if last_save.elapsed() >= settings.autosave_duration || should_quit {
-            //     info!("saving world...");
-            //     w.save(&settings.save_path);
-            //     info!("successfully saved world to \"{}\" (next save in {}s)", settings.save_path.to_str().unwrap(), settings.autosave_duration.as_secs_f32());
-            //     last_save = Instant::now();
-            // }
+            if last_save.elapsed() >= settings.autosave_duration || should_quit {
+                info!("saving world...");
+                w.save(&settings.save_path);
+                info!("successfully saved world to \"{}\" (next save in {}s)", settings.save_path.to_str().unwrap(), settings.autosave_duration.as_secs_f32());
+                last_save = Instant::now();
+            }
 
             // Exit loop if signal received
             if should_quit {
