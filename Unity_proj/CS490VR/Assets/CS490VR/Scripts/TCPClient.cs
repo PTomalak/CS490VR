@@ -19,6 +19,8 @@ public class TCPClient : MonoBehaviour
     private Thread clientReceiveThread;
     bool connected = false;
 
+    public bool TEST = false;
+
     int PORT = 39876;
     // 192.168.118.230
     string IP = "vr.ptomalak.com";
@@ -73,7 +75,7 @@ public class TCPClient : MonoBehaviour
     {
         try
         {
-            if (Application.isEditor && false)
+            if (Application.isEditor && TEST)
             {
                 socketConnection = new TcpClient("localhost", PORT);
             }
