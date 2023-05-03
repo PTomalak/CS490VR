@@ -41,7 +41,7 @@ impl Default for WorldSettings
     fn default() -> Self {
         Self {
             save_path: PathBuf::from(format!("{}{}.world", SERVER_DIRECTORY, UNIX_EPOCH.elapsed().unwrap().as_millis())),
-            autosave_duration: Duration::from_secs(10),
+            autosave_duration: Duration::from_secs(30),
             tick_duration: Duration::from_millis(100),
         }
     }
@@ -425,7 +425,6 @@ impl Network
 
         let mut current = 0usize;
         let mut buffer = vec![FILL; MAX_INCOMING_SIZE];
-        let mut all_messages = Vec::new();
 
         loop {
             // Get full action received (if applicable, non-blocking)
@@ -458,38 +457,12 @@ impl Network
                 }
             }
 
-            /*
             let message = buffer
                 .iter()
                 .position(|e| *e == DELIM)
                 .map(|e| {
                     serde_json::from_slice::<Protocol>(&buffer[..e])
                 });
-             */
-
-            // Update message buffers
-
-            let messages = buffer
-                .as_slice()
-                .split(|b| *b == DELIM)
-                .map(|e| {
-                    let v = e.to_vec();
-                    (v.len(), serde_json::from_slice::<Protocol>(&v))
-                })
-                .filter(|(_, p)| p.is_ok())
-                .map(|(i, e)| (i, e.unwrap()))
-                .collect::<Vec<(usize, Protocol)>>();
-
-            let mut new_messages = messages.iter().map(|e| e.1.clone()).collect::<Vec<Protocol>>();
-            let valid_length = messages.iter().fold(0, |acc, (sz, _)| acc + *sz);
-
-            all_messages.append(&mut new_messages);
-
-            let mut tmp_buffer = buffer[current - valid_length..current].iter().copied().collect::<Vec<u8>>();
-            tmp_buffer.extend(vec![FILL; MAX_INCOMING_SIZE - current].iter());
-            buffer = tmp_buffer.clone();
-
-            current -= valid_length;
 
             // Check if any server -> client action need to be sent (non-blocking after existing messages received)
             for sv_to_cl_message in inbound.try_iter() {
@@ -497,10 +470,24 @@ impl Network
                 serde_json::to_writer(&stream, &sv_to_cl_message.1).ok()?;
             }
 
-            // Parse full actions
-            for m in &all_messages {
-                // Add to message queue
-                outbound.send((addr.to_string(), m.clone())).ok()?;
+            // Parse full action
+            if let Some(m) = message {
+                if let Ok(cl_to_sv_message) = m {
+                    // Reset buffer
+                    buffer.fill(FILL);
+                    current = 0;
+
+                    // Add to message queue
+                    outbound.send((addr.to_string(), cl_to_sv_message)).ok()?;
+                } else {
+                    // let num_zeros = buffer.iter().filter(|e| **e == 0).count();
+                    // warn!("client {} sent bad data with {} zero(s)", addr, num_zeros);
+                    // warn!("client {} sent bad data: \"{}\"", addr, String::from_utf8(buffer.clone()).unwrap());
+
+                    // Reset buffer
+                    buffer.fill(FILL);
+                    current = 0;
+                }
             }
         }
 
