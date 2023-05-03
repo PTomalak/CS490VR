@@ -20,6 +20,7 @@ public class TCPClient : MonoBehaviour
     bool connected = false;
 
     int PORT = 39876;
+    // 192.168.118.230
     string IP = "vr.ptomalak.com";
     string FALLBACK_IP = "vr.ptomalak.com";
     #endregion
