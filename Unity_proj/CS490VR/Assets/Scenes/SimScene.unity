@@ -1142,7 +1142,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layermask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 2147483647
   blockManager: {fileID: 1772401867}
   block_list: {fileID: 0}
   prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}
