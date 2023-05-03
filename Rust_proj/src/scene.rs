@@ -595,8 +595,13 @@ impl Scene
             let terminal_voxel_global_location = self.get_voxel_location(terminal_parent_id, terminal_voxel_id);
 
             // Iterate over adjacent voxels
-            for (_, (neighbor_parent_id, _, neighbor_node_id))
+            for (_, (neighbor_parent_id, neighbor_voxel_id, neighbor_node_id))
             in self.space.get_adjacent(terminal_voxel_global_location) {
+                // Skip non-circuit voxels
+                if !is_circuit_voxel(neighbor_voxel_id) {
+                    continue;
+                }
+
                 // Add connection to circuit if not part of the same block
                 if *neighbor_parent_id != terminal_parent_id {
                     self.circuit.update_edge(terminal_node_id, neighbor_node_id.unwrap(), OFF);

@@ -444,7 +444,6 @@ impl Network
                     match e.kind() {
                         ErrorKind::WouldBlock => {
                             // Do nothing
-                            warn!("client {} needs to block", addr);
                         }
                         _ => {
                             error!("client {} encountered network error", addr);
