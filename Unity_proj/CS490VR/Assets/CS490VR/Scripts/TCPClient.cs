@@ -72,22 +72,31 @@ public class TCPClient : MonoBehaviour
     {
         try
         {
+            if (Application.isEditor)
+            {
+                socketConnection = new TcpClient("localhost", PORT);
+            }
+            else
+            {
+                socketConnection = new TcpClient(IP, PORT);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("CONNECTION: Trying Fallback IP");
             try
             {
-                if (Application.isEditor)
-                {
-                    socketConnection = new TcpClient("localhost", PORT);
-                } else
-                {
-                    socketConnection = new TcpClient(IP, PORT);
-                }
-            }
-            catch (SocketException e)
-            {
-                Debug.Log("CONNECTION: Trying Fallback IP");
                 socketConnection = new TcpClient(FALLBACK_IP, PORT);
             }
+            catch (Exception e2)
+            {
+                Debug.Log("CONNECTION FAILED");
+                return;
+            }
+        }
 
+        try
+        {
             Byte[] bytes = new Byte[1024];
             while (true)
             {

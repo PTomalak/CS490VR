@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.59937435, g: 0.5997503, b: 0.5994877, a: 1}
+  m_IndirectSpecularColor: {r: 0.59937525, g: 0.5997512, b: 0.59948856, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1093,6 +1093,7 @@ MonoBehaviour:
   jp: {fileID: 1772401869}
   playerPrefab: {fileID: 7043017995275549949, guid: cd43e1e85461329419f1df6d79dc63a2,
     type: 3}
+  playerTracker: {fileID: 1828601336}
   myName: 
   myPosition: {x: 0, y: 0, z: 0}
   myRotation: {x: 0, y: 0, z: 0}
@@ -1386,6 +1387,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4e660da2419d1614198b2c073ddf863d, type: 3}
+--- !u!4 &1828601336 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8650654345620415483, guid: 4e660da2419d1614198b2c073ddf863d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1828601335}
+  m_PrefabAsset: {fileID: 0}
 --- !u!23 &1245193298489477784
 MeshRenderer:
   m_ObjectHideFlags: 0

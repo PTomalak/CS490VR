@@ -91,3 +91,8 @@ MonoBehaviour:
       type: 3}
     icon: {fileID: 2800000, guid: 4dec9a878c0b8f04d95625686094f451, type: 3}
     enabled: 1
+  - block: wire
+    prefab: {fileID: 6058163804171375424, guid: b83ba94ae812f0b458111c77e85fdbb6,
+      type: 3}
+    icon: {fileID: 2800000, guid: de78a109d4c35154aae0116426d9b6a8, type: 3}
+    enabled: 1
