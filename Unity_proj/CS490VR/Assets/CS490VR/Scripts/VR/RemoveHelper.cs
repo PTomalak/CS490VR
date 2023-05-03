@@ -16,8 +16,9 @@ public class RemoveHelper : MonoBehaviour
 
         float raycastSize = 1.5f;
         Vector3 raycastDir = transform.rotation * Vector3.forward;
+        Vector3 offset = (raycastDir.normalized * -0.25f * raycastSize);
 
-        RaycastHit[] hit = Physics.RaycastAll(blockPosition, raycastDir, raycastSize, layermask);
+        RaycastHit[] hit = Physics.RaycastAll(blockPosition+offset, raycastDir, raycastSize, layermask);
         //GameObject newBlock = Instantiate(prefab, blockPosition+(raycastDir.normalized*raycastSize), Quaternion.identity);
         // get the nearest raycast by sorting through them
 

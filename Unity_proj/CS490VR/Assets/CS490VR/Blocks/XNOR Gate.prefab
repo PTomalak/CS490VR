@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5853823390750638308}
   - component: {fileID: 6177754640447674147}
   - component: {fileID: 7190635994336782509}
+  - component: {fileID: 5570974089308206216}
   m_Layer: 7
   m_Name: XNOR Gate
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: xnor_gate
   powerableTextures: {fileID: 11400000, guid: 9bbd6cce988e5284183147f8a43c2da2, type: 2}
+--- !u!114 &5570974089308206216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 781537993929538432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfcdec576190d5c439101a65cc1fb59a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  loader: {fileID: 0}

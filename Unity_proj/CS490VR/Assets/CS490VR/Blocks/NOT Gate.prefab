@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5897289877750146349}
   - component: {fileID: 6147518635083231978}
   - component: {fileID: 8247305867449820973}
+  - component: {fileID: 6128543625470201363}
   m_Layer: 7
   m_Name: NOT Gate
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: not_gate
   powerableTextures: {fileID: 11400000, guid: 2f60a0d0f4660154697f18118156de48, type: 2}
+--- !u!114 &6128543625470201363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734931266230115913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db5d46bbd26765e438e8661a130c11f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  loader: {fileID: 0}

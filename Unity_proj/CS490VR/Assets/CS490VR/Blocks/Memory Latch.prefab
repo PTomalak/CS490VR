@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8033695105948986139}
   - component: {fileID: 7780625197661764828}
   - component: {fileID: 9061640440894890639}
+  - component: {fileID: 5152829274276621300}
   m_Layer: 7
   m_Name: Memory Latch
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: memory_latch
   powerableTextures: {fileID: 11400000, guid: 5adcb67653a121c4abf2f11e4589cce6, type: 2}
+--- !u!114 &5152829274276621300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3790072465495330943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfcdec576190d5c439101a65cc1fb59a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  loader: {fileID: 0}

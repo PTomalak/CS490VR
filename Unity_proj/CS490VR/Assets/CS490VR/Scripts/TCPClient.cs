@@ -156,8 +156,6 @@ public class TCPClient : MonoBehaviour
 
     public void SendJson(string request)
     {
-        Debug.Log("SEND: " + request);
-
         if (socketConnection == null)
         {
             return;

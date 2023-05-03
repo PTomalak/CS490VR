@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 56610911230044482}
   - component: {fileID: 310221795270606469}
   - component: {fileID: -3942957772290618162}
+  - component: {fileID: -6036154678495580240}
   m_Layer: 7
   m_Name: Toggle Latch
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: toggle_latch
   powerableTextures: {fileID: 11400000, guid: a0de37bd055eea640a74461b19665d88, type: 2}
+--- !u!114 &-6036154678495580240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6570046670677185062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db5d46bbd26765e438e8661a130c11f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  loader: {fileID: 0}
