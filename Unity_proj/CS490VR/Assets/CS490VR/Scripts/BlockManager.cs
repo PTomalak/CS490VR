@@ -32,7 +32,7 @@ public class BlockManager : MonoBehaviour
         string blockJson = JsonConvert.SerializeObject(data);
         BlockData basicData = JsonConvert.DeserializeObject<BlockData>(blockJson);
 
-        Debug.Log("PLACE: " + blockJson);
+        //Debug.Log("PLACE: " + blockJson);
 
         // Check if our dictionary already contains the block (or wire)
         // and remove that block (or wire)
@@ -160,7 +160,7 @@ public class BlockManager : MonoBehaviour
             // Construct wire data
             BlockData wire_data = new BlockData();
             wire_data.id = 0;
-            wire_data.id = x * 100 + y * 10 + z; // ID for testing server. Actual server discards client IDs
+            wire_data.id = Mathf.Abs(x * 100 + y * 10 + z); // ID for testing server. Actual server discards client IDs
             wire_data.position.Set(new Vector3Int(x, y, z));
             wire_data.SetAdditionalData("wire", new AdditionalData.Powered());
 
@@ -186,7 +186,7 @@ public class BlockManager : MonoBehaviour
 
         // Set position and block type, and zero the ID
         data.id = 0;
-        data.id = x * 100 + y * 10 + z; // ID for testing server. Actual server discards client IDs
+        data.id = Mathf.Abs(x * 100 + y * 10 + z); // ID for testing server. Actual server discards client IDs
         data.position.Set(new Vector3Int(x, y, z));
         data.data.block = block;
 
@@ -309,20 +309,25 @@ public class BlockManager : MonoBehaviour
 
         //ClientRemoveBlock(100);
 
-        // Place several blocks
-        yield return new WaitForSeconds(0.05f);
-        ClientPlaceBlock("toggle", 0, 0, 0);
-        ClientPlaceBlock("clock", 2, 0, 0);
-        yield return new WaitForSeconds(0.05f);
-        //ClientPlaceBlock("wire", 0, 0, 1);
-        //ClientPlaceBlock("wire", 2, 0, 1);
-        yield return new WaitForSeconds(0.05f);
-        ClientPlaceBlock("and_gate", 1, 0, 3);
-        //ClientPlaceBlock("wire", 1, 0, 5);
-        yield return new WaitForSeconds(0.05f);
-        ClientPlaceBlock("pixel", 1, 0, 6);
+        //ClientPlaceBlock("block", 0, 0, 0);
 
-        yield return new WaitForSeconds(2.5f);
-        ClientUpdateBlock(0, new { data = new { data = new { powered = true } } });
+        // Place several blocks
+        //yield return new WaitForSeconds(0.05f);
+        //ClientPlaceBlock("toggle", 0, 0, 0);
+        //yield return new WaitForSeconds(0.05f);
+        //ClientPlaceBlock("clock", 2, 0, 0);
+        //yield return new WaitForSeconds(0.05f);
+        //ClientPlaceBlock("wire", 0, 0, 1);
+        //yield return new WaitForSeconds(0.05f);
+        ////ClientPlaceBlock("wire", 2, 0, 1);
+        //yield return new WaitForSeconds(0.05f);
+        //ClientPlaceBlock("and_gate", 1, 0, 3);
+        //yield return new WaitForSeconds(0.05f);
+        ////ClientPlaceBlock("wire", 1, 0, 5);
+        //yield return new WaitForSeconds(0.05f);
+        //ClientPlaceBlock("pixel", 1, 0, 6);
+
+        //yield return new WaitForSeconds(2.5f);
+        //ClientUpdateBlock(0, new { data = new { data = new { powered = true } } });
     }
 }

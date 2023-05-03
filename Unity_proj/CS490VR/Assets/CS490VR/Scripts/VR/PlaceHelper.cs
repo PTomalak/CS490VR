@@ -13,8 +13,7 @@ public class PlaceHelper : MonoBehaviour
         Vector3 blockPosition = transform.position;
 
         // Instantiate a new block at the spawn position
-        blockManager.ClientPlaceBlockGlobal("block", Mathf.RoundToInt(blockPosition.x), Mathf.RoundToInt(blockPosition.y), Mathf.RoundToInt(blockPosition.z));
-        blockManager.ClientPlaceBlockGlobal("block", 0, 0, 0);
+        blockManager.ClientPlaceBlockGlobal("block", blockPosition.x, blockPosition.y, blockPosition.z);
 
         GameObject newBlock = Instantiate(prefab, blockPosition, Quaternion.identity);
         newBlock.transform.localScale = Vector3.one * 0.05f;
