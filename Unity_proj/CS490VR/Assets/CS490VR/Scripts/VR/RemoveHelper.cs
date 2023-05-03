@@ -34,7 +34,7 @@ public class RemoveHelper : MonoBehaviour
                 dist = h.distance;
             }
         }
-        
+
         //newBlock.transform.localScale = Vector3.one * 0.05f;
         //Destroy(newBlock, 1f);
 
