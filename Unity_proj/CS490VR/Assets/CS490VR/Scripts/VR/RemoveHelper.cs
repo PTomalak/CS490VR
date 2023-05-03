@@ -18,20 +18,31 @@ public class RemoveHelper : MonoBehaviour
         Vector3 raycastDir = transform.rotation * Vector3.forward;
 
         RaycastHit[] hit = Physics.RaycastAll(blockPosition, raycastDir, raycastSize, layermask);
-        GameObject newBlock = Instantiate(prefab, blockPosition+(raycastDir.normalized*raycastSize), Quaternion.identity);
+        //GameObject newBlock = Instantiate(prefab, blockPosition+(raycastDir.normalized*raycastSize), Quaternion.identity);
         // get the nearest raycast by sorting through them
-        if (hit.Length > 0)
-        {
-            newBlock.transform.localScale = Vector3.one * 0.05f;
-            Destroy(newBlock, 1f);
 
-            // Attempt to get the block ID from the hit game object
-            IDataLoader dl = hit[0].transform.GetComponent<IDataLoader>();
-            if (dl != null)
+        if (hit.Length == 0) return;
+
+        RaycastHit nearest = hit[0];
+        float dist = hit[0].distance;
+        foreach (RaycastHit h in hit)
+        {
+            if (h.distance < dist)
             {
-                int id = dl.GetData().id;
-                blockManager.ClientRemoveBlock(id);
+                nearest = h;
+                dist = h.distance;
             }
+        }
+        
+        //newBlock.transform.localScale = Vector3.one * 0.05f;
+        //Destroy(newBlock, 1f);
+
+        // Attempt to get the block ID from the hit game object
+        IDataLoader dl = nearest.transform.GetComponent<IDataLoader>();
+        if (dl != null)
+        {
+            int id = dl.GetData().id;
+            blockManager.ClientRemoveBlock(id);
         }
     }
 
