@@ -199,7 +199,7 @@ impl Network
 
             // Check if a tick needs to be simulated (and associated tasks)
             if last_tick.elapsed() >= settings.tick_duration {
-                let now = Instant::now();
+                let _now = Instant::now();
                 let updates = w.simulate_tick();
                 last_tick = Instant::now();
 
@@ -444,6 +444,7 @@ impl Network
                     match e.kind() {
                         ErrorKind::WouldBlock => {
                             // Do nothing
+                            warn!("client {} needs to block", addr);
                         }
                         _ => {
                             error!("client {} encountered network error", addr);
@@ -476,7 +477,7 @@ impl Network
                     // Add to message queue
                     outbound.send((addr.to_string(), cl_to_sv_message)).ok()?;
                 } else {
-                    error!("client {} sent bad data: {}", addr, String::from_utf8(buffer).unwrap());
+                    error!("client {} sent bad data: \"{}\"", addr, String::from_utf8(buffer).unwrap());
                     break;
                 }
             }
