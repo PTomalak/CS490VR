@@ -202,7 +202,8 @@ impl Network
                 let now = Instant::now();
                 let updates = w.simulate_tick();
                 last_tick = Instant::now();
-                info!("simulated tick in ~{}ms (versus {}ms maximum)", now.elapsed().as_millis(), settings.tick_duration.as_millis());
+
+                // info!("simulated tick in ~{}ms (versus {}ms maximum)", now.elapsed().as_millis(), settings.tick_duration.as_millis());
 
                 // Send client data to all clients
                 let response = (SERVER_ID.to_string(), Protocol::ServerResponseMetadata(ProtocolResponseMetadata {
@@ -375,7 +376,10 @@ impl Network
                         }
                     }
                     Protocol::ClientRequestJoin(data) => {
-                        info!("client {} has name {}", client_id, data.name);
+                        if clients.lock().ok()?.get_mut(&client_id).unwrap().0.is_none() {
+                            info!("client {} has name {}", client_id, data.name);
+                        }
+
                         clients.lock().ok()?.get_mut(&client_id).unwrap().0 = Some(data.clone());
 
                         // Send world state as of this tick
@@ -472,7 +476,7 @@ impl Network
                     // Add to message queue
                     outbound.send((addr.to_string(), cl_to_sv_message)).ok()?;
                 } else {
-                    error!("client {} sent bad data", addr);
+                    error!("client {} sent bad data: {}", addr, String::from_utf8(buffer).unwrap());
                     break;
                 }
             }
