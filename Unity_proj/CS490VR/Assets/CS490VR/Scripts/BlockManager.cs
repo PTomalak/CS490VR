@@ -160,7 +160,7 @@ public class BlockManager : MonoBehaviour
             // Construct wire data
             BlockData wire_data = new BlockData();
             wire_data.id = 0;
-            wire_data.id = x * 100 + y * 10 + z; // ID for testing server. Actual server discards client IDs
+            wire_data.id = Mathf.Abs(x * 100 + y * 10 + z); // ID for testing server. Actual server discards client IDs
             wire_data.position.Set(new Vector3Int(x, y, z));
             wire_data.SetAdditionalData("wire", new AdditionalData.Powered());
 
@@ -186,7 +186,7 @@ public class BlockManager : MonoBehaviour
 
         // Set position and block type, and zero the ID
         data.id = 0;
-        data.id = x * 100 + y * 10 + z; // ID for testing server. Actual server discards client IDs
+        data.id = Mathf.Abs(x * 100 + y * 10 + z); // ID for testing server. Actual server discards client IDs
         data.position.Set(new Vector3Int(x, y, z));
         data.data.block = block;
 
