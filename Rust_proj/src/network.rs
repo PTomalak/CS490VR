@@ -41,7 +41,7 @@ impl Default for WorldSettings
     fn default() -> Self {
         Self {
             save_path: PathBuf::from(format!("{}{}.world", SERVER_DIRECTORY, UNIX_EPOCH.elapsed().unwrap().as_millis())),
-            autosave_duration: Duration::from_secs(10),
+            autosave_duration: Duration::from_secs(30),
             tick_duration: Duration::from_millis(100),
         }
     }
