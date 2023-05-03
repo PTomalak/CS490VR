@@ -18,8 +18,8 @@ public class RotatableLoader : PowerableLoader
             "LEFT" => Quaternion.AngleAxis(270, Vector3.up),
             "FORWARD" => Quaternion.AngleAxis(0, Vector3.up),
             "BACKWARD" => Quaternion.AngleAxis(180, Vector3.up),
-            "UP" => Quaternion.AngleAxis(270, Vector3.right),
-            "DOWN" => Quaternion.AngleAxis(90, Vector3.right),
+            "UPWARD" => Quaternion.AngleAxis(270, Vector3.right),
+            "DOWNWARD" => Quaternion.AngleAxis(90, Vector3.right),
             _ => Quaternion.identity
         };
     }

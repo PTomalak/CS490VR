@@ -10,8 +10,8 @@ public class DioRotateInteract : AltInteractable
         "RIGHT",
         "BACKWARD",
         "LEFT",
-        "UP",
-        "DOWN"
+        "UPWARD",
+        "DOWNWARD"
     };
 
     public BlockManager bm;
