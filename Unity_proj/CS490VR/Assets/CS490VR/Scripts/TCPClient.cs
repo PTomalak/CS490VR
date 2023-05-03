@@ -165,7 +165,7 @@ public class TCPClient : MonoBehaviour
             if (stream.CanWrite)
             {
                 string clientMessage = request;
-                clientMessage += "\0\0";          // Null terminate client messages
+                clientMessage += "\0";          // Null terminate client messages
                 // Convert string message to byte array.                 
                 byte[] clientMessageAsByteArray = Encoding.ASCII.GetBytes(clientMessage);
                 // Write byte array to socketConnection stream.
