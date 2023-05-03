@@ -420,8 +420,8 @@ impl Network
     fn client_handler(inbound: MessagePlainReceiver, outbound: MessagePlainSender, mut stream: TcpStream, addr: SocketAddr) -> Option<()> {
         stream.set_nonblocking(true).ok()?;
 
-        const DELIM: u8 = 1;
-        const FILL: u8 = 0;
+        const DELIM: u8 = 0;
+        const FILL: u8 = 1;
 
         let mut current = 0usize;
         let mut buffer = vec![FILL; MAX_INCOMING_SIZE];
