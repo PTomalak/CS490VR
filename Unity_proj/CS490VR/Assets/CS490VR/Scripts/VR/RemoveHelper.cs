@@ -24,18 +24,15 @@ public class RemoveHelper : MonoBehaviour
             GameObject newBlock = Instantiate(prefab, blockPosition+(raycastDir.normalized*raycastSize), Quaternion.identity);
             newBlock.transform.localScale = Vector3.one * 0.05f;
             Destroy(newBlock, 1f);
-            
-            // for normal blocks
+
+            // Attempt to get the block ID from the hit game object
             IDataLoader dl = hit[0].transform.GetComponent<IDataLoader>();
             if (dl != null)
             {
                 int id = dl.GetData().id;
-                object updateData = new { position = blockPosition };
-
-                blockManager.ClientUpdateBlock(id, updateData);
                 blockManager.ClientRemoveBlock(id);
             }
         }
-
     }
+
 }
