@@ -14,14 +14,17 @@ public class RemoveHelper : MonoBehaviour
         // Get the position of the calling game object
         Vector3 blockPosition = transform.position;
 
-        GameObject newBlock = Instantiate(prefab, blockPosition, Quaternion.identity);
-        newBlock.transform.localScale = Vector3.one * 0.05f;
-        Destroy(newBlock, 1f);
+
 
         RaycastHit[] hit = Physics.RaycastAll(blockPosition, Vector3.up, 1.5f, layermask);
         // get the nearest raycast by sorting through them
         if (hit.Length > 0)
         {
+
+            GameObject newBlock = Instantiate(prefab, blockPosition, Quaternion.identity);
+            newBlock.transform.localScale = Vector3.one * 0.05f;
+            Destroy(newBlock, 1f);
+            
             // for normal blocks
             IDataLoader dl = hit[0].transform.GetComponent<IDataLoader>();
             if (dl != null)
