@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6576533309869422489}
   - component: {fileID: 7604888017128775920}
   - component: {fileID: 7858432930528556855}
-  - component: {fileID: 7178125979678947066}
+  - component: {fileID: -1199654273777535081}
   m_Layer: 7
   m_Name: Pulse
   m_TagString: Untagged
@@ -98,7 +98,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7178125979678947066
+--- !u!114 &-1199654273777535081
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,11 +107,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 3633732729333439380}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a90ace18f026518478a5d67f573ee7d1, type: 3}
+  m_Script: {fileID: 11500000, guid: 01cc57b84c56b8f41bce105301bbee16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   data:
     id: 0
-    position: 000000000000000000000000
-    powered: 0
-    pl: {fileID: 11400000, guid: 34b4abf60ded2aa449f062775c130c04, type: 2}
+    position:
+      x: 0
+      y: 0
+      z: 0
+    rotation: FORWARD
+    data:
+      block: 
+  block: pulse
+  powerableTextures: {fileID: 11400000, guid: 34b4abf60ded2aa449f062775c130c04, type: 2}

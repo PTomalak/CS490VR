@@ -112,4 +112,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     id: 0
-    position: 000000000000000000000000
+    rotation: FORWARD
+    data:
+      block: block
+  block: block

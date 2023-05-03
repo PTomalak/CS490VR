@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6255805066887079302}
   - component: {fileID: 7213749521341952751}
   - component: {fileID: 6961259622641181992}
-  - component: {fileID: 5169943134848790767}
+  - component: {fileID: 6771663027367253436}
   m_Layer: 7
   m_Name: Pulse Latch
   m_TagString: Untagged
@@ -98,7 +98,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5169943134848790767
+--- !u!114 &6771663027367253436
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,12 +107,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 4609437560015391115}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d261a806e6e6e548b04e04f319083ca, type: 3}
+  m_Script: {fileID: 11500000, guid: 33d567de57c9e0840b560c6d24df8485, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   data:
     id: 0
-    position: 000000000000000000000000
-    powered: 0
-    pl: {fileID: 11400000, guid: b9ca3953bb95a2849bb4faf99951927e, type: 2}
-    rotation: 0
+    position:
+      x: 0
+      y: 0
+      z: 0
+    rotation: FORWARD
+    data:
+      block: 
+  block: pulse_latch
+  powerableTextures: {fileID: 11400000, guid: b9ca3953bb95a2849bb4faf99951927e, type: 2}

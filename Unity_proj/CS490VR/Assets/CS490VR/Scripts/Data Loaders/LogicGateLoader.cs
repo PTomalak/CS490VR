@@ -23,20 +23,4 @@ public class LogicGateLoader : RotatableLoader
         ModifyConnection(new Vector3Int(-1, 0, -1), false);
         ModifyConnection(new Vector3Int(1, 0, -1), false);
     }
-
-    private void ModifyConnection(Vector3Int a, bool add)
-    {
-        Vector3Int pos = new Vector3Int(data.position[0], data.position[1], data.position[2]);
-        Quaternion rot = RotatableData.GetRotation(data.rotation);
-        Vector3Int da = pos + Vector3Int.RoundToInt(rot * a);
-
-        if (!bm) bm = GetComponentInParent<BlockManager>();
-        if (add)
-        {
-            bm.wm.AddConnection(da);
-        } else
-        {
-            bm.wm.RemoveConnection(da);
-        }
-    }
 }

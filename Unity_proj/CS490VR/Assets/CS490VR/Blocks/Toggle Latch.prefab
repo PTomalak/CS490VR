@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3604120202731109931}
   - component: {fileID: 56610911230044482}
   - component: {fileID: 310221795270606469}
-  - component: {fileID: 2551903031769541442}
+  - component: {fileID: -3942957772290618162}
   m_Layer: 7
   m_Name: Toggle Latch
   m_TagString: Untagged
@@ -98,7 +98,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2551903031769541442
+--- !u!114 &-3942957772290618162
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,12 +107,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 6570046670677185062}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d261a806e6e6e548b04e04f319083ca, type: 3}
+  m_Script: {fileID: 11500000, guid: ff39df630fdddf3488965f02b981ec7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   data:
     id: 0
-    position: 000000000000000000000000
-    powered: 0
-    pl: {fileID: 11400000, guid: a0de37bd055eea640a74461b19665d88, type: 2}
-    rotation: 0
+    position:
+      x: 0
+      y: 0
+      z: 0
+    rotation: FORWARD
+    data:
+      block: 
+  block: toggle_latch
+  powerableTextures: {fileID: 11400000, guid: a0de37bd055eea640a74461b19665d88, type: 2}

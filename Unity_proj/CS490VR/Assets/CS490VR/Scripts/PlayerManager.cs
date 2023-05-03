@@ -86,7 +86,7 @@ public class PlayerManager : MonoBehaviour
         myName = name;
         myPosition = pos;
         myRotation = rot;
-        tc.SendJson(JsonConvert.SerializeObject(new PlayerData(myName, myPosition, myRotation)));
+        tc.SendJson(JsonUtility.ToJson(new PlayerData(myName, myPosition, myRotation)));
     }
 
     private void Awake()
@@ -99,7 +99,7 @@ public class PlayerManager : MonoBehaviour
     {
         if (myName != "" && prev_send_time+SEND_FREQUENCY < Time.time)
         {
-            tc.SendJson(JsonConvert.SerializeObject(new PlayerData(myName, myPosition, myRotation)));
+            //tc.SendJson(JsonUtility.ToJson(new PlayerData(myName, myPosition, myRotation)));
             prev_send_time = Time.time;
         }
     }

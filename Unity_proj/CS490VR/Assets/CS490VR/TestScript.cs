@@ -58,6 +58,13 @@ public class TestScript : MonoBehaviour
 
             // Place block example
             blockManager.ClientPlaceBlockGlobal("block", 0, 0, 0);
+
+            // Toggle / pulse block interaction example
+            Interactable interactable = hit[0].transform.GetComponent<Interactable>();
+            if (interactable)
+            {
+                interactable.Interact();
+            }
         }
     }
 }
