@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.59937525, g: 0.5997512, b: 0.59948856, a: 1}
+  m_IndirectSpecularColor: {r: 0.59937435, g: 0.5997503, b: 0.5994877, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -414,7 +414,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layermask:
     serializedVersion: 2
-    m_Bits: 2147483647
+    m_Bits: 128
   blockManager: {fileID: 1772401867}
   block_list: {fileID: 11400000, guid: d06ff6ccdadd40147b1a4a02294bad80, type: 2}
   prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}
@@ -1142,7 +1142,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layermask:
     serializedVersion: 2
-    m_Bits: 2147483647
+    m_Bits: 128
   blockManager: {fileID: 1772401867}
   block_list: {fileID: 0}
   prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}

@@ -14,28 +14,21 @@ public class RemoveHelper : MonoBehaviour
         // Get the position of the calling game object
         Vector3 blockPosition = transform.position;
 
-
-
-        RaycastHit[] hit = Physics.RaycastAll(blockPosition, Vector3.up, 1.5f, layermask);
-        // get the nearest raycast by sorting through them
-        if (hit.Length > 0)
+        RaycastHit hit;
+        if (Physics.Raycast(blockPosition, Vector3.up, out hit, 1.5f, layermask))
         {
-
+            // Create a temporary visual effect for the removed block
             GameObject newBlock = Instantiate(prefab, blockPosition, Quaternion.identity);
-            newBlock.transform.localScale = Vector3.one * 0.05f;
             Destroy(newBlock, 1f);
-            
-            // for normal blocks
-            IDataLoader dl = hit[0].transform.GetComponent<IDataLoader>();
+
+            // Attempt to get the block ID from the hit game object
+            IDataLoader dl = hit.transform.GetComponent<IDataLoader>();
             if (dl != null)
             {
                 int id = dl.GetData().id;
-                object updateData = new { position = blockPosition };
-
-                blockManager.ClientUpdateBlock(id, updateData);
                 blockManager.ClientRemoveBlock(id);
             }
         }
-
     }
+
 }
