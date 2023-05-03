@@ -1364,6 +1364,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Block-",
+                    "type": "Button",
+                    "id": "fc9e7fc6-9b13-4622-820a-36c772d1c0ee",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1507,6 +1516,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Block+",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4935b16e-c06a-4292-8f50-926cf22d05a3",
+                    "path": "<XRController>{RightHand}/secondaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Block-",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
