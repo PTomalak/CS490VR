@@ -34,12 +34,16 @@ public class BlockPicker : MonoBehaviour
             int list_length = block_list.LIST.Count;
             index = (index + 1) % list_length;
             block_name = block_list.LIST[index].block;
+
+            UpdateHeld();
         } else if (BButton.action.WasPressedThisFrame())
         {
             // Decrement the length of the list
             int list_length = block_list.LIST.Count;
             index = (index - 1 + list_length) % list_length;
             block_name = block_list.LIST[index].block;
+
+            UpdateHeld();
         }
     }
 
