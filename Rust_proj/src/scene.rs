@@ -1,12 +1,13 @@
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::process::Command;
+use std::str::FromStr;
 
 use cgmath::Array;
-use petgraph::Undirected;
 use petgraph::dot::Dot;
 use petgraph::graph::NodeIndex;
 use petgraph::stable_graph::StableGraph;
+use petgraph::Undirected;
 use serde::{Deserialize, Serialize};
 
 #[allow(unused_imports)]
@@ -22,6 +23,30 @@ pub const OFF: PowerState = false;
 pub const ON: PowerState = true;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct SceneData
+{
+    blocks: HashMap<String, (Coord, Orient, Block)>,
+    circuit: StableGraph<(InstanceID, VoxelID, Coord), PowerState, Undirected, NodeIDType>,
+    space: Grid<(InstanceID, VoxelID, Option<NodeID>)>,
+    ticks: u32,
+}
+
+impl From<Scene> for SceneData
+{
+    fn from(value: Scene) -> Self {
+        Self {
+            blocks: value.blocks
+                .into_iter()
+                .map(|(i, e)| (i.to_string(), e))
+                .collect(),
+            circuit: value.circuit,
+            space: value.space,
+            ticks: value.ticks,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default)]
 pub struct Scene
 {
     blocks: HashMap<InstanceID, (Coord, Orient, Block)>,
@@ -30,18 +55,34 @@ pub struct Scene
     ticks: u32,
 }
 
+impl From<SceneData> for Scene
+{
+    fn from(value: SceneData) -> Self {
+        Self {
+            blocks: value.blocks
+                .into_iter()
+                .map(|(i, e)| (InstanceID::from_str(&i).unwrap(), e))
+                .collect(),
+            circuit: value.circuit,
+            space: value.space,
+            ticks: value.ticks,
+        }
+    }
+}
+
 impl Scene
 {
     /// Load a scene from a file
     pub fn load(path: &Path) -> Scene {
-        serde_json::from_str(&std::fs::read_to_string(path)
+        let s: SceneData = serde_json::from_str(&std::fs::read_to_string(path)
             .expect("failed to read world file"))
-            .expect("failed to deserialize world data")
+            .expect("failed to deserialize world data");
+        Scene::from(s)
     }
 
     /// Save this scene to a file
     pub fn save(&self, path: &Path) {
-        std::fs::write(path, serde_json::to_string(&self)
+        std::fs::write(path, serde_json::to_string(&SceneData::from(self.clone()))
             .expect("failed to serialize world data"))
             .expect("failed to save world file")
     }
@@ -157,7 +198,7 @@ impl Scene
 
                         // Compute output state
 
-                        data.on = input_state;
+                        data.powered = input_state;
                     }
                     Block::ANDGate(data) => {
                         // Get named nodes

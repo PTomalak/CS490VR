@@ -70,7 +70,7 @@ pub struct VoxelPulseLatch
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelPixel
 {
-    pub on: bool,
+    pub powered: bool,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
