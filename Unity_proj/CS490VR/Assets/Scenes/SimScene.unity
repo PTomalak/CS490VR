@@ -320,6 +320,82 @@ MonoBehaviour:
     m_Reference: {fileID: -6975466136225229750, guid: c348712bda248c246b8c49b3db54643f,
       type: 3}
   block_name: 
+  invRenderer: {fileID: 782628378}
+  buckRenderer: {fileID: 642178996}
+  invMesh: {fileID: 782628377}
+  buckMesh: {fileID: 642178995}
+--- !u!1 &67049632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 67049633}
+  - component: {fileID: 67049634}
+  m_Layer: 0
+  m_Name: Interactor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &67049633
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67049632}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1793089057}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &67049634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67049632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b47d139ff927084da512a6c5d9d007c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layermask:
+    serializedVersion: 2
+    m_Bits: 128
+  XButton:
+    m_UseReference: 1
+    m_Action:
+      m_Name: X Button
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 01f4976e-dcfc-42ad-9623-7abbdab38481
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: -651371822769903545, guid: c348712bda248c246b8c49b3db54643f,
+      type: 3}
+  YButton:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Y Button
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 979b0123-8996-493e-8cab-07b0bc064fe4
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
 --- !u!1 &67518915
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,6 +494,7 @@ MonoBehaviour:
   blockManager: {fileID: 1772401867}
   block_list: {fileID: 11400000, guid: d06ff6ccdadd40147b1a4a02294bad80, type: 2}
   prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}
+  picker: {fileID: 40919618}
 --- !u!1 &302988618
 GameObject:
   m_ObjectHideFlags: 0
@@ -637,6 +714,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}
+--- !u!33 &642178995 stripped
+MeshFilter:
+  m_CorrespondingSourceObject: {fileID: 4096404015110827384, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 642178994}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &642178996 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 726256945110301201, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 642178994}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -834,6 +923,18 @@ PrefabInstance:
 --- !u!1 &782628376 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 782628375}
+  m_PrefabAsset: {fileID: 0}
+--- !u!33 &782628377 stripped
+MeshFilter:
+  m_CorrespondingSourceObject: {fileID: 4096404015110827384, guid: 42caebb0abf45034bbd9988774ddfdd1,
+    type: 3}
+  m_PrefabInstance: {fileID: 782628375}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &782628378 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 726256945110301201, guid: 42caebb0abf45034bbd9988774ddfdd1,
     type: 3}
   m_PrefabInstance: {fileID: 782628375}
   m_PrefabAsset: {fileID: 0}
@@ -1055,6 +1156,10 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 0}
   block_name: 
+  invRenderer: {fileID: 0}
+  buckRenderer: {fileID: 0}
+  invMesh: {fileID: 0}
+  buckMesh: {fileID: 0}
 --- !u!1 &1681192816
 GameObject:
   m_ObjectHideFlags: 0
@@ -1153,7 +1258,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layermask:
     serializedVersion: 2
-    m_Bits: 2147483647
+    m_Bits: 128
   blockManager: {fileID: 1772401867}
   block_list: {fileID: 0}
   prefab: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}

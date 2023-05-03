@@ -11,6 +11,12 @@ public class BlockPicker : MonoBehaviour
     public GameObject prefab;
     public InputActionProperty AButton;
     public string block_name;
+
+    public MeshRenderer invRenderer;
+    public MeshRenderer buckRenderer;
+    public MeshFilter invMesh;
+    public MeshFilter buckMesh;
+
     int index;
     // Start is called before the first frame update
     void Start()
@@ -29,6 +35,12 @@ public class BlockPicker : MonoBehaviour
             index = (index + 1) % list_length;
             block_name = block_list.LIST[index].block;
 
+            Material newTexture = block_list.LIST[index].prefab.GetComponent<MeshRenderer>().material;
+            Mesh newMesh = block_list.LIST[index].prefab.GetComponent<MeshFilter>().mesh;
+            invRenderer.material = newTexture;
+            buckRenderer.material = newTexture;
+            invMesh.mesh = newMesh;
+            buckMesh.mesh = newMesh;
         }
     }
 

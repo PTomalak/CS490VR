@@ -19,7 +19,7 @@ public class PlayerManager : MonoBehaviour
     public Dictionary<string, GameObject> playerList = new Dictionary<string, GameObject>();
 
     // Data to handle sending the position/rotation updates
-    float SEND_FREQUENCY = 0.05f;
+    float SEND_FREQUENCY = 0.1f;
     float prev_send_time;
 
     [System.Serializable]

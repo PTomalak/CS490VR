@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DioRotateInteract : Interactable
+public class DioRotateInteract : AltInteractable
 {
     public static List<string> STATES = new List<string>()
     {
@@ -15,16 +15,26 @@ public class DioRotateInteract : Interactable
     };
 
     public BlockManager bm;
-    public LogicGateLoader loader;
+    public DiodeLoader loader;
 
     public override void Interact()
     {
+        Rotate(1);
+    }
+
+    public override void AltInteract()
+    {
+        Rotate(-1);
+    }
+
+    public void Rotate(int amount)
+    {
         if (!bm) bm = GetComponentInParent<BlockManager>();
-        if (!loader) loader = GetComponent<LogicGateLoader>();
+        if (!loader) loader = GetComponent<DiodeLoader>();
 
         string current_rot = loader.GetData().rotation;
         int index = STATES.IndexOf(current_rot);
-        int new_index = index + 1 % STATES.Count;
+        int new_index = (index + amount + STATES.Count) % STATES.Count;
         bm.jp.SendUpdateRequest(new { id = loader.data.id, rotation = STATES[new_index] });
     }
 }

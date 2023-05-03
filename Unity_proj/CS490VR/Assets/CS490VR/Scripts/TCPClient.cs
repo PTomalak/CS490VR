@@ -21,7 +21,7 @@ public class TCPClient : MonoBehaviour
 
     int PORT = 39876;
     string IP = "vr.ptomalak.com";
-    string FALLBACK_IP = "192.168.118.230";
+    string FALLBACK_IP = "vr.ptomalak.com";
     #endregion
 
     ///// ADAPTED FROM BOILERPLATE TCP CLIENT CODE /////
@@ -37,7 +37,7 @@ public class TCPClient : MonoBehaviour
     {
         if (socketConnection != null && !connected)
         {
-            pm.InitializePlayer(DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
+            pm.InitializePlayer(DateTime.Now.Second.ToString()+"."+DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
             connected = true;
         }
     }
@@ -52,8 +52,6 @@ public class TCPClient : MonoBehaviour
 
     public void Connect(string ip, int port)
     {
-        IP = ip;
-        PORT = port;
         if (!jp) return;
 
         try
@@ -167,10 +165,10 @@ public class TCPClient : MonoBehaviour
             if (stream.CanWrite)
             {
                 string clientMessage = request;
-                clientMessage += '\0';          // Null terminate client messages
+                clientMessage += "\0\0";          // Null terminate client messages
                 // Convert string message to byte array.                 
                 byte[] clientMessageAsByteArray = Encoding.ASCII.GetBytes(clientMessage);
-                // Write byte array to socketConnection stream.                 
+                // Write byte array to socketConnection stream.
                 stream.Write(clientMessageAsByteArray, 0, clientMessageAsByteArray.Length);
             }
         }
