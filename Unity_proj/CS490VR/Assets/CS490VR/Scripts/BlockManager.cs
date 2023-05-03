@@ -124,7 +124,7 @@ public class BlockManager : MonoBehaviour
             BlockData wire_data = new BlockData();
             wire_data.id = existing_data.id;
             wire_data.position.Set(wm.wire_ids[basicData.id]);
-            wire_data.SetAdditionalData("wire", new { powered = existing_data.powered });
+            //wire_data.SetAdditionalData("wire", new { data = new { powered = existing_data.powered } });
 
             // Obtain modified version of existing data and update wires
             JsonConvert.PopulateObject(blockJson, wire_data);
@@ -289,7 +289,10 @@ public class BlockManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(BlockTest());
+        if (Application.isEditor)
+        {
+            StartCoroutine(BlockTest());
+        }
     }
 
     private void FixedUpdate()
@@ -312,22 +315,22 @@ public class BlockManager : MonoBehaviour
         //ClientPlaceBlock("block", 0, 0, 0);
 
         // Place several blocks
-        //yield return new WaitForSeconds(0.05f);
-        //ClientPlaceBlock("toggle", 0, 0, 0);
-        //yield return new WaitForSeconds(0.05f);
-        //ClientPlaceBlock("clock", 2, 0, 0);
-        //yield return new WaitForSeconds(0.05f);
-        //ClientPlaceBlock("wire", 0, 0, 1);
-        //yield return new WaitForSeconds(0.05f);
-        ////ClientPlaceBlock("wire", 2, 0, 1);
-        //yield return new WaitForSeconds(0.05f);
-        //ClientPlaceBlock("and_gate", 1, 0, 3);
-        //yield return new WaitForSeconds(0.05f);
-        ////ClientPlaceBlock("wire", 1, 0, 5);
-        //yield return new WaitForSeconds(0.05f);
-        //ClientPlaceBlock("pixel", 1, 0, 6);
+        yield return new WaitForSeconds(0.05f);
+        ClientPlaceBlock("toggle", 0, 0, 0);
+        yield return new WaitForSeconds(0.05f);
+        ClientPlaceBlock("clock", 2, 0, 0);
+        yield return new WaitForSeconds(0.05f);
+        ClientPlaceBlock("wire", 0, 0, 1);
+        yield return new WaitForSeconds(0.05f);
+        ClientPlaceBlock("wire", 2, 0, 1);
+        yield return new WaitForSeconds(0.05f);
+        ClientPlaceBlock("and_gate", 1, 0, 3);
+        yield return new WaitForSeconds(0.05f);
+        ClientPlaceBlock("wire", 1, 0, 5);
+        yield return new WaitForSeconds(0.05f);
+        ClientPlaceBlock("pixel", 1, 0, 6);
 
-        //yield return new WaitForSeconds(2.5f);
-        //ClientUpdateBlock(0, new { data = new { data = new { powered = true } } });
+        yield return new WaitForSeconds(5f);
+        ClientUpdateBlock(0, new { data = new { data = new { powered = true } } });
     }
 }
