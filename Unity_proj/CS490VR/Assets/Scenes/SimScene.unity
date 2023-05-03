@@ -630,6 +630,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Bucket
       objectReference: {fileID: 0}
+    - target: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}
 --- !u!1 &705507993
@@ -817,6 +822,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Inventory
+      objectReference: {fileID: 0}
+    - target: {fileID: 5904306136944804213, guid: 42caebb0abf45034bbd9988774ddfdd1,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2611555408976208972, guid: 42caebb0abf45034bbd9988774ddfdd1, type: 3}
