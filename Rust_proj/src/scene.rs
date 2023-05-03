@@ -1,7 +1,9 @@
 use std::collections::{HashMap, HashSet};
+use std::ops::Rem;
 use std::path::Path;
 use std::process::Command;
 use std::str::FromStr;
+use std::time::UNIX_EPOCH;
 
 use cgmath::Array;
 use petgraph::dot::Dot;
@@ -556,7 +558,7 @@ impl Scene
     ///
     /// Returns the block's ID or `None` if a block overlaps an existing block
     pub fn add_block(&mut self, block: Block, location: Coord, orientation: Orient) -> Option<InstanceID> {
-        let id = self.blocks.len() as u32;
+        let id = UNIX_EPOCH.elapsed().unwrap().as_millis().rem((1u32 << 31u32) as u128) as u32;
         self.add_block_with_id(id, block, location, orientation)
     }
 
