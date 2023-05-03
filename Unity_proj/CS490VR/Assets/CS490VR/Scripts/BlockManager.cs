@@ -32,7 +32,7 @@ public class BlockManager : MonoBehaviour
         string blockJson = JsonConvert.SerializeObject(data);
         BlockData basicData = JsonConvert.DeserializeObject<BlockData>(blockJson);
 
-        Debug.Log("PLACE: " + blockJson);
+        //Debug.Log("PLACE: " + blockJson);
 
         // Check if our dictionary already contains the block (or wire)
         // and remove that block (or wire)

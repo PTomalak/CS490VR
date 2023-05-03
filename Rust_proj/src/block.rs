@@ -76,7 +76,7 @@ pub struct VoxelPixel
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct VoxelBlock
 {
-    pub color: Color,
+    // pub color: Color,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
