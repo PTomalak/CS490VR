@@ -13,6 +13,7 @@ public class ToggleInteract : Interactable
         if (!pl) pl = GetComponent<PowerableLoader>();
 
         AdditionalData.Powered pow = AdditionalData.GetPoweredData(pl.data.data);
-        bm.ClientUpdateBlock(pl.data.id, new { data = new { data = new { powered = !pow.powered } } });
+        //bm.ClientUpdateBlock(pl.data.id, new { data = new { data = new { powered = !pow.powered } } });
+        bm.jp.SendUpdateRequest(new { id = pl.data.id, data = new { data = new { powered = !pow.powered } } });
     }
 }
