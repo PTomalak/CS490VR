@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2900104904678266103}
   - component: {fileID: 3222325865106916144}
   - component: {fileID: 1283886647482728438}
+  - component: {fileID: -984224568500819976}
   m_Layer: 7
   m_Name: Toggle
   m_TagString: Untagged
@@ -121,3 +122,17 @@ MonoBehaviour:
       block: 
   block: toggle
   powerableTextures: {fileID: 11400000, guid: 5ad289490ec1f7b43919ec6a8deca3dc, type: 2}
+--- !u!114 &-984224568500819976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8348371863008964499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d04c4efb87349b742a57b064146364ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bm: {fileID: 0}
+  pl: {fileID: 0}
