@@ -12,8 +12,7 @@ public class ToggleInteract : Interactable
         if (!bm) bm = GetComponentInParent<BlockManager>();
         if (!pl) pl = GetComponent<PowerableLoader>();
 
-        AdditionalData.Powered pow = AdditionalData.GetPoweredData(pl.GetData().data);
-        //bm.ClientUpdateBlock(pl.data.id, new { data = new { data = new { powered = !pow.powered } } });
-        bm.jp.SendUpdateRequest(new { id = pl.data.id, data = new { data = new { powered = !pow.powered } } });
+        AdditionalData.Powered pow = AdditionalData.GetPoweredData(pl.GetData().data.data);
+        bm.ClientUpdateBlock(pl.data.id, new { data = new { data = new { powered = !pow.powered } } });
     }
 }

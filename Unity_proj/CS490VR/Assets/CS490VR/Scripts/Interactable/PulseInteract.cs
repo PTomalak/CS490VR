@@ -12,7 +12,6 @@ public class PulseInteract : Interactable
         if (!bm) bm = GetComponentInParent<BlockManager>();
         if (!pl) pl = GetComponent<PowerableLoader>();
 
-        //bm.ClientUpdateBlock(pl.data.id, new { data = new { data = new { start_tick = bm.tick } } });
-        bm.jp.SendUpdateRequest(new { id = pl.GetData().id, data = new { data = new { start_tick = bm.tick } } });
+        bm.ClientUpdateBlock(pl.data.id, new { data = new { data = new { start_tick = bm.tick, powered = true } } });
     }
 }
