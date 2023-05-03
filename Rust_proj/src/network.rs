@@ -294,13 +294,14 @@ impl Network
                         // Process blocks
                         for i in &data {
                             let update_result = if i.position.is_some() || i.rotation.is_some() {
-                                w.get_block(i.id)
-                                    .map(|(coord, orient, block)| {
-                                        w.replace_block(i.id,
-                                                        i.data.clone().unwrap_or(block),
-                                                        i.position.unwrap_or(coord),
-                                                        i.rotation.unwrap_or(orient))
-                                    })?
+                                if let Some((coord, orient, block)) = w.get_block(i.id) {
+                                    w.replace_block(i.id,
+                                                    i.data.clone().unwrap_or(block),
+                                                    i.position.unwrap_or(coord),
+                                                    i.rotation.unwrap_or(orient))
+                                } else {
+                                    None
+                                }
                             } else if let Some(d) = i.data.clone() {
                                 w.update_block(i.id, d)
                                     .map(|_| ())
