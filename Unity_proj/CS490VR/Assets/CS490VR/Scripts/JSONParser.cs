@@ -136,6 +136,8 @@ public class JSONParser : MonoBehaviour
     // Also sends a BMResponse reflecting the success of the action
     public void PerformAction(string json)
     {
+        if (json == null) return;
+
         Action action = JsonConvert.DeserializeObject<Action>(json);
         if (action.action == null) return;  // Do nothing for a non-action
         if (!bm) return;
