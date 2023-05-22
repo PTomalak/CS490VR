@@ -45,6 +45,11 @@ public class TCPClient : MonoBehaviour
             pm.InitializePlayer(DateTime.Now.Second.ToString()+"."+DateTime.Now.Millisecond.ToString(), Vector3.zero, Vector3.zero);
             connected = true;
         }
+
+        if (socketConnection == null)
+        {
+            Connect(IP, PORT);
+        }
     }
 
     private void OnDestroy()
@@ -151,9 +156,11 @@ public class TCPClient : MonoBehaviour
                 }
             }
         }
-        catch (SocketException socketException)
+        catch (Exception socketException)
         {
             Debug.Log("CONNECTION ERR: " + socketException);
+            Debug.Log("Attempting Reconnect");
+            socketConnection = null;
         }
     }
 
@@ -177,9 +184,11 @@ public class TCPClient : MonoBehaviour
                 stream.Write(clientMessageAsByteArray, 0, clientMessageAsByteArray.Length);
             }
         }
-        catch (SocketException socketException)
+        catch (Exception socketException)
         {
             Debug.Log("Socket Write exception: " + socketException);
+            Debug.Log("Attempting Reconnect");
+            socketConnection = null;
         }
     }
 }
